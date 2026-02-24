@@ -6,15 +6,16 @@
 
 // ─── Portfolio Data ──────────────────────────────────
 const PORTFOLIO = [
-    { id: 1, title: 'Cinematic Brand Story', category: 'commercial', tools: 'Premiere Pro, After Effects', client: 'LuxBrand Co.', desc: 'A high-end brand film capturing the ethos of a luxury lifestyle brand, featuring slow-motion cinematography and intricate color grading.', yt: 'dQw4w9WgXcQ', emoji: '🎬' },
-    { id: 2, title: 'Mountain Wedding Film', category: 'wedding', tools: 'DaVinci Resolve, Premiere', client: 'Sharma & Priya', desc: 'An emotional and cinematic wedding documentary blending candid moments with thoughtfully choreographed sequences in the Himalayas.', yt: 'dQw4w9WgXcQ', emoji: '💍' },
-    { id: 3, title: 'Tech Channel Rebrand', category: 'youtube', tools: 'After Effects, Premiere', client: 'TechVision YT', desc: 'Complete visual rebrand for a 500k subscriber tech channel — new intro, lower-thirds, end-screens and episode edits.', yt: 'dQw4w9WgXcQ', emoji: '📱' },
-    { id: 4, title: 'Fashion Week Recap', category: 'commercial', tools: 'Premiere Pro, Photoshop', client: 'StyleIndia', desc: 'Fast-paced fashion recap reel for a major Indian Fashion Week event, delivered across social media platforms within 24 hours.', yt: 'dQw4w9WgXcQ', emoji: '👗' },
-    { id: 5, title: 'Indie Music Video', category: 'music', tools: 'After Effects, DaVinci', client: 'Aryan Raj Music', desc: 'Narrative-driven music video blending live action with motion graphics for an independent artist with 2M+ views.', yt: 'dQw4w9WgXcQ', emoji: '🎵' },
-    { id: 6, title: 'Corporate Annual Report', category: 'corporate', tools: 'Premiere, Motion Graphics', client: 'Nexus Corp', desc: 'A crisp 8-minute corporate presentation combining animated infographics with interview footage for annual stakeholders meeting.', yt: 'dQw4w9WgXcQ', emoji: '🏢' },
-    { id: 7, title: 'Travel Vlog Series', category: 'youtube', tools: 'Premiere Pro, Lightroom', client: 'Wanderlust YT', desc: 'Long-form travel vlog series across Southeast Asia — edited weekly with consistent visual style and dynamic pacing.', yt: 'dQw4w9WgXcQ', emoji: '✈️' },
-    { id: 8, title: 'Product Launch Ad', category: 'commercial', tools: 'After Effects, Cinema 4D', client: 'GadgetX India', desc: '30-second product reveal advertisement featuring 3D product mockups parented to live footage for seamless integration.', yt: 'dQw4w9WgXcQ', emoji: '🚀' },
-    { id: 9, title: 'Destination Wedding Edit', category: 'wedding', tools: 'DaVinci Resolve', client: 'Mehta Wedding Films', desc: 'A Goa beach wedding film with cinematic color science, surreal DaVinci grade, and bespoke soundscape design.', yt: 'dQw4w9WgXcQ', emoji: '🌊' },
+    { id: 1, title: 'Fortune Air Diwali Reel', category: 'commercial', tools: 'Premiere Pro, After Effects', client: 'Fortune Air', desc: 'High-energy Diwali commercial reel for Fortune Air — vibrant colour grading and dynamic cuts.', mp4: 'videos/FORTUNE AIR DIWALI REEL-1.mp4', emoji: '🎬' },
+    { id: 2, title: 'Hiren & Krishna Teaser', category: 'wedding', tools: 'DaVinci Resolve, Premiere', client: 'Hiren & Krishna', desc: 'A cinematic wedding teaser capturing love, rituals and raw emotions with a contemporary cinematic grade.', mp4: 'videos/HIREN & KRISHNA TEASER.mp4', emoji: '💍' },
+    { id: 3, title: 'Jayneel Riya Reel', category: 'wedding', tools: 'Premiere Pro, After Effects', client: 'Jayneel & Riya', desc: 'Short-form wedding reel highlighting the best moments from a beautiful ceremony and reception.', mp4: 'videos/Jayneel Riya reel.mp4', emoji: '💒' },
+    { id: 4, title: 'Nazarbaug Diwali Reel', category: 'commercial', tools: 'Premiere Pro, Photoshop', client: 'Nazarbaug', desc: 'Festive Diwali promotional reel for Nazarbaug — warm tones, quick cuts and celebratory energy.', mp4: 'videos/NAZARBAUG DIWALI REEL_1.mp4', emoji: '🪔' },
+    { id: 5, title: 'Neimish Creative Reel', category: 'youtube', tools: 'After Effects, Premiere', client: 'Neimish', desc: 'A dynamic creative reel showcasing visual storytelling through fast-paced editing and motion graphics.', mp4: 'videos/Neimish_20260122_002210_0000.mp4', emoji: '📱' },
+    { id: 6, title: 'Shreenand New Reel', category: 'youtube', tools: 'Premiere, Motion Graphics', client: 'Shreenand', desc: 'Modern lifestyle reel with slick transitions, colour science and branded motion graphics.', mp4: 'videos/SHREENAND NEW REEL01  1.mp4', emoji: '🎥' },
+    { id: 7, title: 'Sequence Edit', category: 'corporate', tools: 'Premiere Pro, After Effects', client: 'Studio Project', desc: 'A polished sequence edit demonstrating professional multi-camera workflow and colour consistency.', mp4: 'videos/Sequence 01.mp4', emoji: '🏢' },
+    { id: 8, title: 'Engagement Reel', category: 'wedding', tools: 'DaVinci Resolve', client: 'Engagement Film', desc: 'Emotion-filled engagement reel with soft, romantic colour grade capturing every candid moment.', mp4: 'videos/engagement reel.mp4', emoji: '💑' },
+    { id: 9, title: 'Final Reel', category: 'commercial', tools: 'Premiere Pro, After Effects', client: 'Studio Showcase', desc: 'A studio showreel demonstrating range across commercial, wedding and lifestyle productions.', mp4: 'videos/final reel.mp4', emoji: '🌟' },
+    { id: 10, title: 'Pure Dental Opening Reel', category: 'corporate', tools: 'Premiere Pro, After Effects', client: 'Pure Dental', desc: 'Grand opening promotional reel for Pure Dental Clinic — clean aesthetics, professional grade and brand-aligned visuals.', mp4: 'videos/pure dental opening reel.mp4', emoji: '🦷' },
 ];
 
 const TESTIMONIALS = [
@@ -473,8 +474,14 @@ function openModal(item) {
     overlay.querySelector('.modal-tools').textContent = item.tools;
     overlay.querySelector('.modal-cat').textContent = item.category.toUpperCase();
     overlay.querySelector('.modal-desc').textContent = item.desc;
-    const iframe = overlay.querySelector('iframe');
-    iframe.src = `https://www.youtube.com/embed/${item.yt}?autoplay=1&mute=1`;
+
+    // Replace iframe with local video player
+    const videoWrap = overlay.querySelector('.modal-video');
+    videoWrap.innerHTML = `
+        <video controls autoplay style="width:100%;height:100%;object-fit:contain;border-radius:8px;background:#000">
+            <source src="${item.mp4}" type="video/mp4" />
+        </video>
+    `;
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
 }
@@ -483,8 +490,11 @@ function closeModal() {
     const overlay = document.getElementById('modal-overlay');
     if (!overlay) return;
     overlay.classList.remove('open');
-    const iframe = overlay.querySelector('iframe');
-    iframe.src = '';
+    // Stop any playing video
+    const video = overlay.querySelector('video');
+    if (video) video.pause();
+    const videoWrap = overlay.querySelector('.modal-video');
+    if (videoWrap) videoWrap.innerHTML = '<video controls></video>';
     document.body.style.overflow = '';
 }
 
@@ -568,41 +578,81 @@ function setupContactForm() {
         // Loading state
         if (submitBtn) { submitBtn.textContent = 'Sending...'; submitBtn.classList.add('loading'); }
 
-        try {
-            const data = new FormData(form);
-            const res = await fetch(form.action, {
-                method: 'POST',
-                body: data,
-                headers: { 'Accept': 'application/json' }
-            });
+        const phone = (form.querySelector('[name="phone"]') || {}).value || '';
+        const message = (form.querySelector('[name="message"]') || {}).value || '';
 
-            if (res.ok) {
-                // ── SUCCESS ──
-                form.reset();
-                if (statusDiv) {
-                    statusDiv.textContent = '✓ Message sent! I\'ll reply within 24 hours.';
-                    statusDiv.className = 'form-status visible success';
-                }
-                showToast(`Thanks ${name}! Your inquiry has been sent. Check your email for a greeting from me.`, 'success');
-                // Google Analytics event (if GA is installed)
-                if (typeof gtag === 'function') {
-                    gtag('event', 'form_submit', { event_category: 'Contact', event_label: project });
-                }
-            } else {
-                const json = await res.json().catch(() => ({}));
-                throw new Error(json.error || 'Server error');
-            }
-        } catch (err) {
+        let serverOnline = false;
+        try {
+            const res = await fetch('http://localhost:3001/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, phone, project, message })
+            });
+            if (res.ok) serverOnline = true;
+        } catch (_) { /* server offline — will use mailto fallback */ }
+
+        if (serverOnline) {
+            // ── Server saved it + email notification sent ──
+            form.reset();
             if (statusDiv) {
-                statusDiv.textContent = '✗ Something went wrong. Please email me directly.';
-                statusDiv.className = 'form-status visible error';
+                statusDiv.textContent = '✓ Message sent! I\'ll reply within 24 hours.';
+                statusDiv.className = 'form-status visible success';
             }
-            showToast('Submission failed. Please email manav@example.com directly.', 'error');
-            console.error('Form error:', err);
-        } finally {
-            if (submitBtn) { submitBtn.textContent = 'Send Message ✉'; submitBtn.classList.remove('loading'); }
+            showToast(`Thanks ${name}! Your message has been received.`, 'success');
+            if (typeof gtag === 'function') {
+                gtag('event', 'form_submit', { event_category: 'Contact', event_label: project });
+            }
+        } else {
+            // ── Fallback: open Gmail with all details pre-filled ──
+            const body = [
+                `Name: ${name}`,
+                `Email: ${email}`,
+                phone ? `Phone: ${phone}` : '',
+                project ? `Project: ${project}` : '',
+                '',
+                message
+            ].filter(Boolean).join('\n');
+
+            const mailto = `mailto:shraddhavideology@gmail.com`
+                + `?subject=${encodeURIComponent(`New Inquiry: ${project || 'General'} from ${name}`)}`
+                + `&body=${encodeURIComponent(body)}`;
+
+            window.open(mailto, '_blank');
+            form.reset();
+            if (statusDiv) {
+                statusDiv.textContent = '✉ Your email app opened — please hit Send there.';
+                statusDiv.className = 'form-status visible success';
+            }
+            showToast('Email app opened — please hit Send to complete!', 'success');
         }
+
+        if (submitBtn) { submitBtn.textContent = 'Send Message ✉'; submitBtn.classList.remove('loading'); }
     });
+}
+
+// ─────────────────────────────────────────────────────────
+// SHOWREEL MULTI-VIDEO SWITCHER
+// ─────────────────────────────────────────────────────────
+function playReel(thumb, src, label, num) {
+    // Update main video
+    const mainVideo = document.getElementById('main-reel-video');
+    const mainTitle = document.getElementById('main-reel-title');
+    const counter = document.getElementById('reel-counter');
+    if (mainVideo) {
+        mainVideo.pause();
+        mainVideo.src = src;
+        mainVideo.load();
+        mainVideo.play().catch(() => { });
+    }
+    if (mainTitle) mainTitle.textContent = label;
+    if (counter && num) counter.textContent = num + ' / 10';
+
+    // Update active thumbnail highlight
+    document.querySelectorAll('.reel-thumb').forEach(t => t.classList.remove('active'));
+    thumb.classList.add('active');
+
+    // Scroll thumb into view inside its track
+    thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 }
 
 // ─────────────────────────────────────────────────────────

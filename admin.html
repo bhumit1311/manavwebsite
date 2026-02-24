@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel — Shraddha Videology</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #111118;
+            --card: #17171f;
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #e8b86d;
+            --accent-dim: rgba(232, 184, 109, 0.12);
+            --text: #f0f0f0;
+            --muted: #888;
+            --danger: #f87171;
+            --success: #4ade80;
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── LOGIN ── */
+        #login-screen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at 40% 40%, #1a1230 0%, var(--bg) 70%);
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+        }
+
+        .login-logo {
+            font-size: 1rem;
+            letter-spacing: 0.2em;
+            color: var(--accent);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .login-sub {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.82rem;
+            margin-bottom: 36px;
+        }
+
+        .login-icon {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 18px;
+        }
+
+        .field-label {
+            font-size: 0.73rem;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .field-input {
+            width: 100%;
+            background: #0f0f18;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            margin-bottom: 18px;
+            transition: border-color 0.2s;
+        }
+
+        .field-input:focus {
+            border-color: var(--accent);
+        }
+
+        .login-btn {
+            width: 100%;
+            background: var(--accent);
+            color: #0a0a0f;
+            border: none;
+            border-radius: 8px;
+            padding: 13px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .login-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .login-error {
+            color: var(--danger);
+            font-size: 0.82rem;
+            text-align: center;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .server-note {
+            background: rgba(232, 184, 109, 0.08);
+            border: 1px solid rgba(232, 184, 109, 0.2);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* ── DASHBOARD ── */
+        #dashboard {
+            display: none;
+        }
+
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-brand {
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.12em;
+            font-size: 0.95rem;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .topbar-user {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 220px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            color: var(--muted);
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+            border-left-color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .nav-icon {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-label {
+            font-weight: 500;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--accent);
+            color: #000;
+            border-radius: 20px;
+            padding: 1px 7px;
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+
+        .sidebar-section {
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            color: #444;
+            text-transform: uppercase;
+            padding: 20px 24px 8px;
+            font-weight: 600;
+        }
+
+        /* ── MAIN ── */
+        .main {
+            flex: 1;
+            padding: 32px 36px;
+            overflow-y: auto;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page-header {
+            margin-bottom: 28px;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .page-desc {
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        /* ── STATS ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+        }
+
+        .stat-icon {
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 2px;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── VIDEO MANAGER ── */
+        .video-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .video-slot {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .slot-thumb {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #0e0e14;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slot-thumb video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .slot-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: var(--accent);
+            color: #000;
+            font-size: 0.65rem;
+            font-weight: 700;
+            border-radius: 4px;
+            padding: 3px 7px;
+        }
+
+        .slot-body {
+            padding: 14px 16px;
+        }
+
+        .slot-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .slot-file-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .slot-file-name {
+            font-size: 0.75rem;
+            color: var(--muted);
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-pick-btn {
+            background: var(--accent-dim);
+            border: 1px solid rgba(232, 184, 109, 0.3);
+            color: var(--accent);
+            border-radius: 6px;
+            padding: 5px 12px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .file-pick-btn:hover {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .hidden-file-input {
+            display: none;
+        }
+
+        /* ── SUBMISSIONS ── */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-pill {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            border-radius: 20px;
+            padding: 5px 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-pill.active {
+            background: var(--accent-dim);
+            border-color: rgba(232, 184, 109, 0.4);
+            color: var(--accent);
+        }
+
+        .sub-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .sub-card.unread {
+            border-left: 3px solid var(--accent);
+        }
+
+        .sub-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .sub-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--accent-dim);
+            border: 1px solid rgba(232, 184, 109, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .sub-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .sub-email {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        .sub-time {
+            margin-left: auto;
+            font-size: 0.72rem;
+            color: var(--muted);
+        }
+
+        .sub-project {
+            display: inline-block;
+            background: var(--accent-dim);
+            color: var(--accent);
+            font-size: 0.72rem;
+            border-radius: 4px;
+            padding: 2px 8px;
+            margin-bottom: 10px;
+        }
+
+        .sub-message {
+            font-size: 0.87rem;
+            color: #ccc;
+            line-height: 1.6;
+            border-left: 3px solid var(--border);
+            padding-left: 12px;
+        }
+
+        .sub-phone {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 8px;
+        }
+
+        .sub-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .sub-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            border-radius: 6px;
+            padding: 5px 14px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .sub-btn.reply {
+            border-color: rgba(232, 184, 109, 0.4);
+            color: var(--accent);
+        }
+
+        .sub-btn.reply:hover {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .sub-btn.delete:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        /* ── SETTINGS ── */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .settings-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+        }
+
+        .settings-card-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .settings-card-desc {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            font-size: 0.73rem;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: #0f0f18;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 13px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+        }
+
+        .save-btn {
+            background: var(--accent);
+            color: #0a0a0f;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 22px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-family: inherit;
+        }
+
+        .save-btn:hover {
+            opacity: 0.88;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-key {
+            color: var(--muted);
+        }
+
+        .info-val {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* ── TOAST ── */
+        .admin-toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 20px;
+            font-size: 0.87rem;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 9999;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            max-width: 360px;
+        }
+
+        .admin-toast.show {
+            display: flex;
+        }
+
+        .admin-toast.success {
+            border-color: rgba(74, 222, 128, 0.4);
+        }
+
+        .admin-toast.error {
+            border-color: rgba(248, 113, 113, 0.4);
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 700px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .nav-label,
+            .nav-badge,
+            .sidebar-section {
+                display: none;
+            }
+
+            .main {
+                padding: 24px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- LOGIN -->
+    <div id="login-screen">
+        <div class="login-box">
+            <div class="login-icon">🎬</div>
+            <div class="login-logo">SHRADDHA VIDEOLOGY</div>
+            <div class="login-sub">Admin Panel · Restricted Access</div>
+            <div class="server-note" id="server-note">⚡ Server offline? You can still login with default credentials.
+            </div>
+            <div class="form-row">
+                <div class="field-label">Username</div>
+                <input type="text" id="login-user" class="field-input" placeholder="Enter username"
+                    autocomplete="off" />
+            </div>
+            <div class="form-row" style="margin-bottom:24px">
+                <div class="field-label">Password</div>
+                <input type="password" id="login-pass" class="field-input" placeholder="Enter password" />
+            </div>
+            <button class="login-btn" onclick="doLogin()">Sign In →</button>
+            <div class="login-error" id="login-error">Incorrect username or password</div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard">
+        <div class="topbar">
+            <div class="topbar-brand">&#x1F3AC; SV Admin</div>
+            <div class="topbar-right">
+                <!-- Server Status Pill -->
+                <div id="server-status-pill" style="position:relative">
+                    <button id="srv-pill-btn" onclick="toggleServerHelp()"
+                        style="display:flex;align-items:center;gap:6px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);color:#4ade80;border-radius:20px;padding:4px 12px;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:inherit">
+                        <span id="srv-dot"
+                            style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block"></span>
+                        <span id="srv-label">Checking...</span>
+                    </button>
+                    <!-- Help Popover (shown when offline) -->
+                    <div id="srv-popover"
+                        style="display:none;position:absolute;right:0;top:calc(100% + 8px);background:#1a1a24;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:18px 20px;width:260px;z-index:999;box-shadow:0 20px 60px rgba(0,0,0,0.7)">
+                        <div style="font-weight:700;font-size:0.88rem;margin-bottom:10px">&#x1F680; How to Start Server
+                        </div>
+                        <ol style="color:#aaa;font-size:0.8rem;line-height:1.9;padding-left:18px;margin:0 0 14px">
+                            <li>Open your <strong style="color:#f0f0f0">project folder</strong></li>
+                            <li>Double-click <strong style="color:#e8b86d">START.bat</strong></li>
+                            <li>Wait for the black window to show <span style="color:#4ade80">&#x2713; Server is
+                                    running!</span></li>
+                            <li>Come back here &amp; click Retry</li>
+                        </ol>
+                        <div style="font-size:0.72rem;color:#555">&#x1F4C1; manav port / START.bat</div>
+                        <button onclick="location.reload()"
+                            style="margin-top:12px;width:100%;background:#e8b86d;color:#000;border:none;border-radius:6px;padding:8px;font-size:0.8rem;font-weight:700;cursor:pointer;font-family:inherit">&#x21BA;
+                            Retry Connection</button>
+                    </div>
+                </div>
+                <div class="topbar-user" id="topbar-user">Admin</div>
+                <button class="logout-btn" onclick="doLogout()">Logout</button>
+            </div>
+        </div>
+
+        <div class="layout">
+            <div class="sidebar">
+                <div class="sidebar-section">Menu</div>
+                <div class="nav-item active" onclick="showPage('overview',this)"><span class="nav-icon">📊</span><span
+                        class="nav-label">Overview</span></div>
+                <div class="nav-item" onclick="showPage('videos',this)"><span class="nav-icon">🎥</span><span
+                        class="nav-label">Video Manager</span></div>
+                <div class="nav-item" onclick="showPage('submissions',this)"><span class="nav-icon">📬</span><span
+                        class="nav-label">Submissions</span><span class="nav-badge" id="sub-badge">0</span></div>
+                <div class="sidebar-section">System</div>
+                <div class="nav-item" onclick="showPage('settings',this)"><span class="nav-icon">⚙️</span><span
+                        class="nav-label">Settings</span></div>
+            </div>
+
+            <div class="main">
+
+                <!-- OVERVIEW -->
+                <div class="page active" id="page-overview">
+                    <div class="page-header">
+                        <div class="page-title">Overview</div>
+                        <div class="page-desc">Welcome back! Quick snapshot of your portfolio.</div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-card">
+                            <div class="stat-icon">📬</div>
+                            <div class="stat-value" id="stat-total">—</div>
+                            <div class="stat-label">Total Inquiries</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🆕</div>
+                            <div class="stat-value" id="stat-new">—</div>
+                            <div class="stat-label">New (Unread)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🎥</div>
+                            <div class="stat-value">10</div>
+                            <div class="stat-label">Portfolio Videos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🗄️</div>
+                            <div class="stat-value">SQLite</div>
+                            <div class="stat-label">Database Type</div>
+                        </div>
+                    </div>
+                    <div
+                        style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px">
+                        <div style="font-weight:600;margin-bottom:16px;font-size:0.95rem">📬 Recent Submissions</div>
+                        <div id="overview-subs">
+                            <div style="color:var(--muted);text-align:center;padding:30px 0;font-size:0.85rem">
+                                Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIDEO MANAGER -->
+                <div class="page" id="page-videos">
+                    <div class="page-header">
+                        <div class="page-title">Video Manager</div>
+                        <div class="page-desc">Update the videos shown in your portfolio. Type a new filename and click
+                            Save. The file must exist in your project folder.</div>
+                    </div>
+                    <div class="video-slots" id="video-slots"></div>
+                </div>
+
+                <!-- SUBMISSIONS -->
+                <div class="page" id="page-submissions">
+                    <div class="page-header">
+                        <div class="page-title">Contact Submissions</div>
+                        <div class="page-desc">All inquiries from your contact form, stored in the real database.</div>
+                    </div>
+                    <div
+                        style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+                        <div class="filter-bar" style="margin:0">
+                            <div class="filter-pill active" onclick="loadSubmissions('all',this)">All</div>
+                            <div class="filter-pill" onclick="loadSubmissions('unread',this)">Unread</div>
+                            <div class="filter-pill" onclick="loadSubmissions('read',this)">Read</div>
+                        </div>
+                        <div style="display:flex;gap:8px">
+                            <button class="sub-btn" onclick="exportSubs()"
+                                style="border-color:rgba(232,184,109,0.3);color:var(--accent)">📥 Export</button>
+                            <button class="sub-btn delete" onclick="clearAllSubs()">🗑️ Clear All</button>
+                        </div>
+                    </div>
+                    <div id="submissions-list"></div>
+                </div>
+
+                <!-- SETTINGS -->
+                <div class="page" id="page-settings">
+                    <div class="page-header">
+                        <div class="page-title">Settings</div>
+                        <div class="page-desc">Manage admin credentials and portfolio info.</div>
+                    </div>
+                    <div class="settings-grid">
+                        <div class="settings-card">
+                            <div class="settings-card-title">🔐 Change Login</div>
+                            <div class="settings-card-desc">Update your admin username &amp; password</div>
+                            <div class="form-row">
+                                <div class="form-label">New Username</div><input type="text" id="new-user"
+                                    class="form-input" placeholder="Enter new username" />
+                            </div>
+                            <div class="form-row">
+                                <div class="form-label">New Password</div><input type="password" id="new-pass"
+                                    class="form-input" placeholder="Enter new password" />
+                            </div>
+                            <div class="form-row">
+                                <div class="form-label">Confirm Password</div><input type="password" id="confirm-pass"
+                                    class="form-input" placeholder="Confirm password" />
+                            </div>
+                            <button class="save-btn" onclick="saveCredentials()">Save Credentials</button>
+                        </div>
+                        <div class="settings-card">
+                            <div class="settings-card-title">🎬 Studio Info</div>
+                            <div class="settings-card-desc">Current portfolio contact details</div>
+                            <div class="info-row"><span class="info-key">Studio</span><span class="info-val">Shraddha
+                                    Videology &amp; Production</span></div>
+                            <div class="info-row"><span class="info-key">Email</span><span
+                                    class="info-val">shraddhavideology@gmail.com</span></div>
+                            <div class="info-row"><span class="info-key">WhatsApp</span><span class="info-val">+91
+                                    7874712871</span></div>
+                            <div class="info-row"><span class="info-key">Instagram</span><span
+                                    class="info-val">@shraddha_videology</span></div>
+                            <div class="info-row"><span class="info-key">Database File</span><span
+                                    class="info-val">database.db</span></div>
+                            <div style="margin-top:16px"><a href="/" target="_blank" class="save-btn"
+                                    style="text-decoration:none;display:inline-block">🌐 View Portfolio</a></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-toast" id="admin-toast"></div>
+
+    <script>
+        'use strict';
+        const API = 'http://localhost:3001/api';
+        let currentUser = '';
+        let allSubmissions = [];
+
+        // ── AUTH ──
+        let offlineMode = false;
+        // Fallback credentials (same as server defaults) for offline access
+        const OFFLINE_CREDS = { username: 'manav2109', password: 'manav@2109' };
+
+        async function doLogin() {
+            const u = document.getElementById('login-user').value.trim();
+            const p = document.getElementById('login-pass').value;
+            const errEl = document.getElementById('login-error');
+
+            let loginOk = false;
+            let serverUp = true;
+
+            try {
+                const res = await fetch(`${API}/login`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
+                if (res.ok) loginOk = true;
+                else { errEl.textContent = 'Incorrect username or password'; errEl.style.display = 'block'; setTimeout(() => errEl.style.display = 'none', 3000); return; }
+            } catch {
+                // Server offline — validate locally
+                serverUp = false;
+                if (u === OFFLINE_CREDS.username && p === OFFLINE_CREDS.password) {
+                    loginOk = true;
+                    offlineMode = true;
+                } else {
+                    errEl.textContent = 'Incorrect credentials (server offline — using default credentials)';
+                    errEl.style.display = 'block';
+                    setTimeout(() => errEl.style.display = 'none', 4000);
+                    return;
+                }
+            }
+
+            if (loginOk) {
+                currentUser = u;
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('topbar-user').innerHTML = `Signed in as <strong>${u}</strong>`;
+                initDashboard();
+            }
+        }
+
+
+
+        function doLogout() {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('login-user').value = '';
+            document.getElementById('login-pass').value = '';
+        }
+
+        // ── SERVER STATUS MONITOR ──
+        let _srvPopoverOpen = false;
+        let _srvOnline = false;
+
+        function updateServerPill(online) {
+            const dot = document.getElementById('srv-dot');
+            const label = document.getElementById('srv-label');
+            const btn = document.getElementById('srv-pill-btn');
+            if (!dot) return;
+            if (online) {
+                dot.style.background = '#4ade80';
+                btn.style.background = 'rgba(74,222,128,0.1)';
+                btn.style.borderColor = 'rgba(74,222,128,0.3)';
+                btn.style.color = '#4ade80';
+                label.textContent = 'Server Online';
+                // Auto-close popover when server comes back
+                if (_srvPopoverOpen) toggleServerHelp();
+            } else {
+                dot.style.background = '#f87171';
+                btn.style.background = 'rgba(248,113,113,0.1)';
+                btn.style.borderColor = 'rgba(248,113,113,0.3)';
+                btn.style.color = '#f87171';
+                label.textContent = 'Server Offline';
+            }
+            _srvOnline = online;
+        }
+
+        async function checkServer() {
+            try {
+                const r = await fetch(`${API}/videos`, { signal: AbortSignal.timeout(3000) });
+                updateServerPill(r.ok || r.status < 500);
+            } catch {
+                updateServerPill(false);
+            }
+        }
+
+        function toggleServerHelp() {
+            // Only show popover when offline
+            if (_srvOnline) return;
+            const pop = document.getElementById('srv-popover');
+            _srvPopoverOpen = !_srvPopoverOpen;
+            pop.style.display = _srvPopoverOpen ? 'block' : 'none';
+        }
+
+        // Close popover if clicking outside
+        document.addEventListener('click', (e) => {
+            const pill = document.getElementById('server-status-pill');
+            if (pill && !pill.contains(e.target)) {
+                document.getElementById('srv-popover').style.display = 'none';
+                _srvPopoverOpen = false;
+            }
+        });
+
+        function startServerMonitor() {
+            checkServer();
+            setInterval(checkServer, 5000);
+        }
+
+
+        // ── NAV ──
+        function showPage(name, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('page-' + name).classList.add('active');
+            el.classList.add('active');
+            if (name === 'submissions') loadSubmissions('all', document.querySelector('.filter-pill'));
+        }
+
+        // ── INIT ──
+        function initDashboard() {
+            buildVideoSlots();
+            loadOverview();
+            startServerMonitor();
+        }
+
+        // ── VIDEO MANAGER ──
+        const VIDEO_SLOTS = [
+            { id: 'slot_final', label: 'Final Reel', cat: 'Showreel', def: 'videos/final reel.mp4' },
+            { id: 'slot_fortune', label: 'Fortune Air Diwali', cat: 'Commercial', def: 'videos/FORTUNE AIR DIWALI REEL-1.mp4' },
+            { id: 'slot_hiren', label: 'Hiren & Krishna', cat: 'Wedding', def: 'videos/HIREN & KRISHNA TEASER.mp4' },
+            { id: 'slot_jayneel', label: 'Jayneel Riya Reel', cat: 'Wedding', def: 'videos/Jayneel Riya reel.mp4' },
+            { id: 'slot_nazarbaug', label: 'Nazarbaug Diwali', cat: 'Commercial', def: 'videos/NAZARBAUG DIWALI REEL_1.mp4' },
+            { id: 'slot_neimish', label: 'Neimish Reel', cat: 'YouTube', def: 'videos/Neimish_20260122_002210_0000.mp4' },
+            { id: 'slot_shreenand', label: 'Shreenand Reel', cat: 'YouTube', def: 'videos/SHREENAND NEW REEL01  1.mp4' },
+            { id: 'slot_sequence', label: 'Sequence Edit', cat: 'Corporate', def: 'videos/Sequence 01.mp4' },
+            { id: 'slot_engagement', label: 'Engagement Reel', cat: 'Wedding', def: 'videos/engagement reel.mp4' },
+            { id: 'slot_dental', label: 'Pure Dental Opening', cat: 'Corporate', def: 'videos/pure dental opening reel.mp4' },
+        ];
+
+        async function buildVideoSlots() {
+            // Load saved config from database
+            let savedConfig = {};
+            try {
+                const res = await fetch(`${API}/videos`);
+                savedConfig = await res.json();
+            } catch { }
+
+            const container = document.getElementById('video-slots');
+            container.innerHTML = '';
+            VIDEO_SLOTS.forEach(slot => {
+                const file = savedConfig[slot.id] || slot.def;
+                const div = document.createElement('div');
+                div.className = 'video-slot';
+                div.innerHTML = `
+            <div class="slot-thumb">
+                <video src="${file}" muted preload="metadata" style="width:100%;height:100%;object-fit:cover"></video>
+                <div class="slot-badge">${slot.cat}</div>
+            </div>
+            <div class="slot-body">
+                <div class="slot-title">${slot.label}</div>
+                <div class="slot-file-row">
+                    <input type="text" value="${file}" id="vinput-${slot.id}" class="form-input" style="font-size:0.75rem;padding:6px 10px" placeholder="filename.mp4" />
+                    <button class="file-pick-btn" onclick="saveVideoSlot('${slot.id}')">Save</button>
+                </div>
+            </div>
+        `;
+                container.appendChild(div);
+            });
+        }
+
+        async function saveVideoSlot(slotId) {
+            const fileName = document.getElementById('vinput-' + slotId).value.trim();
+            if (!fileName) { showToast('Please enter a filename', 'error'); return; }
+            try {
+                await fetch(`${API}/videos`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ slot_id: slotId, file_name: fileName })
+                });
+                showToast('✅ Video slot saved to database!', 'success');
+            } catch { showToast('❌ Could not save. Is the server running?', 'error'); }
+        }
+
+        // ── OVERVIEW ──
+        async function loadOverview() {
+            try {
+                const res = await fetch(`${API}/submissions`);
+                allSubmissions = await res.json();
+                const unread = allSubmissions.filter(s => !s.is_read);
+                document.getElementById('stat-total').textContent = allSubmissions.length;
+                document.getElementById('stat-new').textContent = unread.length;
+                document.getElementById('sub-badge').textContent = unread.length;
+
+                const overviewEl = document.getElementById('overview-subs');
+                const recent = allSubmissions.slice(0, 4);
+                if (!recent.length) {
+                    overviewEl.innerHTML = `<div style="color:var(--muted);text-align:center;padding:30px 0;font-size:0.85rem">No submissions yet.</div>`;
+                } else {
+                    overviewEl.innerHTML = recent.map(s => `
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+                    <div style="width:34px;height:34px;border-radius:50%;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;color:var(--accent);flex-shrink:0">${(s.name || '?')[0].toUpperCase()}</div>
+                    <div style="flex:1;min-width:0">
+                        <div style="font-size:0.88rem;font-weight:600">${s.name || 'Unknown'}</div>
+                        <div style="font-size:0.75rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.email || ''} · ${s.project || 'General Inquiry'}</div>
+                    </div>
+                    <div style="font-size:0.72rem;color:var(--muted);white-space:nowrap">${formatDate(s.created_at)}</div>
+                </div>
+            `).join('');
+                }
+            } catch {
+                document.getElementById('overview-subs').innerHTML = `<div style="color:var(--danger);text-align:center;padding:20px;font-size:0.85rem">⚠️ Cannot connect to server.</div>`;
+            }
+        }
+
+        // ── SUBMISSIONS ──
+        async function loadSubmissions(filter = 'all', pillEl) {
+            if (pillEl) {
+                document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+                pillEl.classList.add('active');
+            }
+            try {
+                const res = await fetch(`${API}/submissions`);
+                allSubmissions = await res.json();
+                // Mark all as read
+                allSubmissions.filter(s => !s.is_read).forEach(s => {
+                    fetch(`${API}/submissions/${s.id}/read`, { method: 'PATCH' });
+                });
+                const unread = allSubmissions.filter(s => !s.is_read).length;
+                document.getElementById('sub-badge').textContent = unread;
+                document.getElementById('stat-new').textContent = unread;
+
+                let filtered = allSubmissions;
+                if (filter === 'unread') filtered = allSubmissions.filter(s => !s.is_read);
+                else if (filter === 'read') filtered = allSubmissions.filter(s => s.is_read);
+
+                renderSubmissions(filtered);
+            } catch {
+                document.getElementById('submissions-list').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div>Cannot connect to server. Make sure START.bat is running.</div>`;
+            }
+        }
+
+        function renderSubmissions(subs) {
+            const el = document.getElementById('submissions-list');
+            if (!subs.length) {
+                el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div>No submissions found.</div></div>`;
+                return;
+            }
+            el.innerHTML = subs.map(s => `
+        <div class="sub-card ${s.is_read ? '' : 'unread'}" id="subcard-${s.id}">
+            <div class="sub-header">
+                <div class="sub-avatar">${(s.name || '?')[0].toUpperCase()}</div>
+                <div>
+                    <div class="sub-name">${s.name || 'Unknown'}</div>
+                    <div class="sub-email">${s.email || 'No email'}</div>
+                </div>
+                <div class="sub-time">${formatDate(s.created_at)}</div>
+            </div>
+            ${s.project ? `<span class="sub-project">📁 ${s.project}</span>` : ''}
+            <div class="sub-message">${s.message || '(no message)'}</div>
+            ${s.phone ? `<div class="sub-phone">📞 ${s.phone}</div>` : ''}
+            <div class="sub-actions">
+                ${s.email ? `<button class="sub-btn reply" onclick="replyTo('${s.email}','${s.name || ''}')">📧 Reply</button>` : ''}
+                ${s.phone ? `<button class="sub-btn reply" onclick="window.open('https://wa.me/91${(s.phone || '').replace(/\\D/g, '')}')">💬 WhatsApp</button>` : ''}
+                <button class="sub-btn delete" onclick="deleteSub(${s.id})">🗑️ Delete</button>
+            </div>
+        </div>
+    `).join('');
+        }
+
+        function replyTo(email, name) {
+            window.open(`mailto:${email}?subject=Re: Your inquiry — Shraddha Videology&body=Hi ${name},%0A%0AThank you for reaching out!%0A%0A`);
+        }
+
+        async function deleteSub(id) {
+            if (!confirm('Delete this submission?')) return;
+            await fetch(`${API}/submissions/${id}`, { method: 'DELETE' });
+            showToast('Submission deleted', 'success');
+            loadSubmissions('all', null);
+            loadOverview();
+        }
+
+        async function clearAllSubs() {
+            if (!confirm('Delete ALL submissions from the database? This cannot be undone.')) return;
+            await fetch(`${API}/submissions`, { method: 'DELETE' });
+            showToast('All submissions cleared', 'success');
+            loadSubmissions('all', null);
+            loadOverview();
+        }
+
+        async function exportSubs() {
+            window.open(`${API}/submissions/export`);
+        }
+
+        // ── SETTINGS ──
+        async function saveCredentials() {
+            const u = document.getElementById('new-user').value.trim();
+            const p = document.getElementById('new-pass').value;
+            const c = document.getElementById('confirm-pass').value;
+            if (!u || !p) { showToast('Please fill in all fields', 'error'); return; }
+            if (p !== c) { showToast('Passwords do not match', 'error'); return; }
+            try {
+                await fetch(`${API}/credentials`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
+                showToast('✅ Credentials saved to database!', 'success');
+                document.getElementById('topbar-user').innerHTML = `Signed in as <strong>${u}</strong>`;
+            } catch { showToast('❌ Save failed', 'error'); }
+        }
+
+        // ── HELPERS ──
+        function formatDate(dt) {
+            if (!dt) return '—';
+            const d = new Date(dt);
+            return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        let toastTimer;
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('admin-toast');
+            t.textContent = msg;
+            t.className = 'admin-toast show ' + type;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.className = 'admin-toast', 4000);
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') doLogin();
+        });
+    </script>
+</body>
+
+</html>
