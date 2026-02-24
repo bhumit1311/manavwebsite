@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manav | Professional Video Editor & Visual Storyteller — India</title>
+    <meta name="description"
+        content="Manav is a professional freelance video editor and visual storyteller based in India, specialising in commercial films, wedding edits, YouTube content, motion graphics, colour grading, and brand storytelling." />
+    <meta name="keywords"
+        content="freelance video editor India, professional video editor, Adobe Premiere Pro editor, After Effects motion graphics, DaVinci Resolve colourist, wedding film editor, YouTube video editing, Instagram reels editor, commercial ad editor" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Manav" />
+    <link rel="canonical" href="https://manavfilms.netlify.app/" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="Manav | Professional Video Editor & Visual Storyteller" />
+    <meta property="og:description"
+        content="Award-winning freelance video editor based in India. Cinematic storytelling, motion graphics, colour grading, wedding films, YouTube editing." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://manavfilms.netlify.app/" />
+    <meta property="og:image" content="https://manavfilms.netlify.app/og-image.jpg" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Manav | Professional Video Editor" />
+    <meta name="twitter:description"
+        content="Freelance video editor in India. Commercial films, weddings, YouTube, motion graphics." />
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Manav",
+    "jobTitle": "Professional Video Editor & Visual Storyteller",
+    "description": "Freelance video editor specialising in commercial films, weddings, YouTube content, motion graphics and colour grading.",
+    "url": "https://manavfilms.netlify.app/",
+    "address": { "@type": "PostalAddress", "addressCountry": "IN" },
+    "knowsAbout": ["Video Editing","Adobe Premiere Pro","After Effects","DaVinci Resolve","Motion Graphics","Colour Grading","Wedding Films"],
+    "offers": [
+      { "@type": "Offer", "name": "YouTube Video Editing", "priceCurrency": "INR", "price": "3500" },
+      { "@type": "Offer", "name": "Instagram Reels & Shorts", "priceCurrency": "INR", "price": "800" },
+      { "@type": "Offer", "name": "Wedding & Event Films", "priceCurrency": "INR", "price": "15000" },
+      { "@type": "Offer", "name": "Commercial Advertisements", "priceCurrency": "INR", "price": "12000" },
+      { "@type": "Offer", "name": "Colour Grading", "priceCurrency": "INR", "price": "4000" }
+    ]
+  }
+  </script>
+    <link rel="stylesheet" href="style.css" />
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- CURSOR -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="cursor">
+        <div class="cursor-dot"></div>
+        <div class="cursor-ring"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- FLASH OVERLAY -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="flash-overlay"></div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- LOADING SCREEN -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="loading-screen">
+        <div class="loading-logo">SHRADDHA VIDEOLOGY</div>
+        <div class="loading-tagline">Professional Video Editor &amp; Visual Storyteller</div>
+        <div class="loading-bar-wrap">
+            <div class="loading-bar" id="loading-bar"></div>
+        </div>
+        <div class="loading-percent" id="loading-percent">0%</div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- INTRO SCREEN (3D Camera) -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="intro-screen">
+        <canvas id="intro-canvas"></canvas>
+        <div class="intro-grid-lines"></div>
+        <div class="intro-vignette"></div>
+        <div class="intro-content">
+            <div class="intro-title">Shraddha Videology</div>
+            <div class="intro-sub">Video Editor &amp; Visual Storyteller</div>
+            <div class="intro-click">— Click anywhere to enter —</div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- MAIN SITE -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="main-site" style="display:none">
+
+        <!-- NAV -->
+        <nav id="navbar">
+            <a href="#hero" class="nav-logo">M.</a>
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#portfolio">Work</a></li>
+                <li><a href="#showreel">Showreel</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <a href="#contact" class="nav-cta">Hire Me</a>
+            <div class="hamburger" id="hamburger" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </div>
+        </nav>
+
+        <!-- MOBILE MENU -->
+        <div class="mobile-menu" id="mobile-menu">
+            <div class="mobile-close" id="mobile-close">✕</div>
+            <a href="#about">About</a>
+            <a href="#skills">Skills</a>
+            <a href="#services">Services</a>
+            <a href="#portfolio">Work</a>
+            <a href="#showreel">Showreel</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#contact">Contact</a>
+        </div>
+
+        <!-- ══════════════════════════ HERO ══════════════════════════ -->
+        <section id="hero">
+            <div class="hero-video-bg">
+                <video autoplay muted loop playsinline>
+                    <source src="12.mp4" type="video/mp4" />
+                </video>
+            </div>
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <div class="hero-eyebrow">Freelance Video Editor · India</div>
+                <h1 class="hero-name">SHRADDHA VIDEOLOGY</h1>
+                <div class="hero-title">Professional Video Editor &amp; Visual Storyteller</div>
+                <p class="hero-tagline">I craft cinematic films that move audiences — from brand stories to wedding
+                    films, reels to feature narratives.</p>
+                <div class="hero-cta-group">
+                    <a href="#portfolio" class="btn-primary">▤ View Portfolio</a>
+                    <a href="#showreel" class="btn-outline">▶ Watch Showreel</a>
+                    <a href="#contact" class="btn-ghost">✉ Hire Me</a>
+                </div>
+            </div>
+            <div class="scroll-indicator">Scroll</div>
+        </section>
+
+        <!-- ══════════════════════════ ABOUT ══════════════════════════ -->
+        <section id="about">
+            <div class="about-grid">
+                <div class="about-image-wrap reveal-up">
+                    <div class="about-image">🎬</div>
+                    <div class="about-image-accent"></div>
+                    <div class="about-badge">5+<small>Years</small></div>
+                </div>
+                <div class="about-text">
+                    <span class="section-label reveal-up">About Me</span>
+                    <h2 class="section-title reveal-up">Crafting Stories <span>Frame by Frame</span></h2>
+                    <p class="about-desc reveal-up">
+                        I'm Manav — a professional video editor and visual storyteller based in India with over 5 years
+                        of experience shaping raw footage into compelling cinematic narratives. My journey began with a
+                        deep passion for films and evolved into a career working across commercials, weddings, YouTube
+                        channels, and brand films.
+                    </p>
+                    <p class="about-desc reveal-up" style="margin-top:16px">
+                        I believe every frame is an opportunity to evoke emotion. Whether I'm crafting a 30-second
+                        Instagram
+                        reel or a 20-minute wedding documentary, my philosophy remains constant: tell the truest, most
+                        beautiful version of every story.
+                    </p>
+                    <div class="about-tags reveal-up">
+                        <span class="about-tag">Weddings</span>
+                        <span class="about-tag">Commercials</span>
+                        <span class="about-tag">YouTube</span>
+                        <span class="about-tag">Music Videos</span>
+                        <span class="about-tag">Corporate</span>
+                        <span class="about-tag">Fashion</span>
+                        <span class="about-tag">Travel</span>
+                        <span class="about-tag">Documentary</span>
+                    </div>
+                    <div class="counters reveal-up">
+                        <div class="counter-card">
+                            <div class="counter-num" data-count="5" data-suffix="+">0+</div>
+                            <div class="counter-label">Years Experience</div>
+                        </div>
+                        <div class="counter-card">
+                            <div class="counter-num" data-count="500" data-suffix="+">0+</div>
+                            <div class="counter-label">Projects Completed</div>
+                        </div>
+                        <div class="counter-card">
+                            <div class="counter-num" data-count="150" data-suffix="+">0+</div>
+                            <div class="counter-label">Happy Clients</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════ SKILLS ══════════════════════════ -->
+        <section id="skills">
+            <div style="max-width:1200px;margin:0 auto">
+                <span class="section-label reveal-up">Skills &amp; Tools</span>
+                <h2 class="section-title reveal-up">My <span>Creative</span> Arsenal</h2>
+                <p class="section-desc reveal-up">Industry-leading tools, mastered to deliver cinematic-grade work on
+                    every project.</p>
+                <div class="skills-grid">
+                    <div class="skill-card reveal-up">
+                        <div class="skill-icon">🎞️</div>
+                        <div class="skill-name">Adobe Premiere Pro</div>
+                        <div class="skill-bar-wrap">
+                            <div class="skill-bar" data-width="97"></div>
+                        </div>
+                        <div class="skill-pct">97%</div>
+                    </div>
+                    <div class="skill-card reveal-up">
+                        <div class="skill-icon">✨</div>
+                        <div class="skill-name">After Effects</div>
+                        <div class="skill-bar-wrap">
+                            <div class="skill-bar" data-width="92"></div>
+                        </div>
+                        <div class="skill-pct">92%</div>
+                    </div>
+                    <div class="skill-card reveal-up">
+                        <div class="skill-icon">🎨</div>
+                        <div class="skill-name">DaVinci Resolve</div>
+                        <div class="skill-bar-wrap">
+                            <div class="skill-bar" data-width="90"></div>
+                        </div>
+                        <div class="skill-pct">90%</div>
+                    </div>
+                    <div class="skill-card reveal-up">
+                        <div class="skill-icon">🍎</div>
+                        <div class="skill-name">Final Cut Pro</div>
+                        <div class="skill-bar-wrap">
+                            <div class="skill-bar" data-width="85"></div>
+                        </div>
+                        <div class="skill-pct">85%</div>
+                    </div>
+                    <div class="skill-card reveal-up">
+                        <div class="skill-icon">🖼️</div>
+                        <div class="skill-name">Photoshop</div>
+                        <div class="skill-bar-wrap">
+                            <div class="skill-bar" data-width="88"></div>
+                        </div>
+                        <div class="skill-pct">88%</div>
+                    </div>
+                    <div class="skill-card reveal-up">
+                        <div class="skill-icon">🔥</div>
+                        <div class="skill-name">Motion Graphics</div>
+                        <div class="skill-bar-wrap">
+                            <div class="skill-bar" data-width="89"></div>
+                        </div>
+                        <div class="skill-pct">89%</div>
+                    </div>
+                    <div class="skill-card reveal-up">
+                        <div class="skill-icon">🌈</div>
+                        <div class="skill-name">Colour Grading</div>
+                        <div class="skill-bar-wrap">
+                            <div class="skill-bar" data-width="95"></div>
+                        </div>
+                        <div class="skill-pct">95%</div>
+                    </div>
+                    <div class="skill-card reveal-up">
+                        <div class="skill-icon">🔊</div>
+                        <div class="skill-name">Sound Design</div>
+                        <div class="skill-bar-wrap">
+                            <div class="skill-bar" data-width="82"></div>
+                        </div>
+                        <div class="skill-pct">82%</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════ SERVICES ══════════════════════════ -->
+        <section id="services">
+            <div style="max-width:1200px;margin:0 auto">
+                <span class="section-label reveal-up">What I Offer</span>
+                <h2 class="section-title reveal-up">Freelance <span>Services</span></h2>
+                <p class="section-desc reveal-up">Professional video editing services tailored for creators, brands, and
+                    businesses of all sizes.</p>
+                <div class="services-grid">
+                    <div class="service-card reveal-up">
+                        <div class="service-icon">📹</div>
+                        <div class="service-title">YouTube Video Editing</div>
+                        <p class="service-desc">Engaging long-form edits with dynamic pacing, custom intros, lower
+                            thirds, and end screens optimised for YouTube's algorithm.</p>
+                        <span class="service-price">Starting ₹3,500</span>
+                    </div>
+                    <div class="service-card reveal-up">
+                        <div class="service-icon">📱</div>
+                        <div class="service-title">Instagram Reels &amp; Shorts</div>
+                        <p class="service-desc">Viral-optimised short-form content with trending transitions, text
+                            animations, and platform-native dimensions.</p>
+                        <span class="service-price">Starting ₹800</span>
+                    </div>
+                    <div class="service-card reveal-up">
+                        <div class="service-icon">📺</div>
+                        <div class="service-title">Commercial Ads</div>
+                        <p class="service-desc">High-impact brand commercials for TV, digital, and social — from product
+                            launches to lifestyle campaigns.</p>
+                        <span class="service-price">Starting ₹12,000</span>
+                    </div>
+                    <div class="service-card reveal-up">
+                        <div class="service-icon">💍</div>
+                        <div class="service-title">Wedding &amp; Event Films</div>
+                        <p class="service-desc">Cinematic wedding documentaries and event highlights that preserve your
+                            most precious memories forever.</p>
+                        <span class="service-price">Starting ₹15,000</span>
+                    </div>
+                    <div class="service-card reveal-up">
+                        <div class="service-icon">✨</div>
+                        <div class="service-title">Motion Graphics</div>
+                        <p class="service-desc">Custom animated titles, logos, infographics, and visual effects that
+                            elevate any production.</p>
+                        <span class="service-price">Starting ₹5,000</span>
+                    </div>
+                    <div class="service-card reveal-up">
+                        <div class="service-icon">🏢</div>
+                        <div class="service-title">Corporate Videos</div>
+                        <p class="service-desc">Professional corporate edits for presentations, internal communications,
+                            training videos, and company HR films.</p>
+                        <span class="service-price">Starting ₹8,000</span>
+                    </div>
+                    <div class="service-card reveal-up">
+                        <div class="service-icon">🎙️</div>
+                        <div class="service-title">Podcast Editing</div>
+                        <p class="service-desc">Audio-cleaned, visually engaging podcast edits for YouTube uploads with
+                            animated audiograms and captions.</p>
+                        <span class="service-price">Starting ₹2,000</span>
+                    </div>
+                    <div class="service-card reveal-up">
+                        <div class="service-icon">🎨</div>
+                        <div class="service-title">Colour Grading</div>
+                        <p class="service-desc">Professional colour science — from neutral corrections to bespoke
+                            cinematic LUTs and creative colour stories.</p>
+                        <span class="service-price">Starting ₹4,000</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════ PORTFOLIO ══════════════════════════ -->
+        <section id="portfolio">
+            <div style="max-width:1200px;margin:0 auto">
+                <span class="section-label reveal-up">Selected Work</span>
+                <h2 class="section-title reveal-up">Portfolio <span>&amp; Projects</span></h2>
+                <p class="section-desc reveal-up">A curated selection of projects spanning commercials, weddings,
+                    YouTube channels, and music videos.</p>
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all">All</button>
+                    <button class="filter-tab" data-filter="commercial">Commercial</button>
+                    <button class="filter-tab" data-filter="wedding">Wedding</button>
+                    <button class="filter-tab" data-filter="youtube">YouTube</button>
+                    <button class="filter-tab" data-filter="music">Music Video</button>
+                    <button class="filter-tab" data-filter="corporate">Corporate</button>
+                </div>
+                <div class="portfolio-grid" id="portfolio-grid"></div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════ SHOWREEL ══════════════════════════ -->
+        <section id="showreel" style="position:relative;overflow:hidden">
+            <div
+                style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
+                <div class="showreel-label">SHOWREEL</div>
+            </div>
+            <div style="position:relative;z-index:2;text-align:center">
+                <div class="showreel-year reveal-up">2024 Showreel</div>
+                <div style="max-width:1000px;margin:0 auto" class="reveal-up">
+                    <div class="showreel-player-wrap">
+                        <div class="showreel-video">
+                            <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0&modestbranding=1"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen loading="lazy" title="Manav — Showreel 2024"></iframe>
+                        </div>
+                    </div>
+                    <p style="color:var(--muted);margin-top:32px;font-size:0.9rem;letter-spacing:0.1em">
+                        5 years · 500+ projects · 150+ satisfied clients
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════ TESTIMONIALS ══════════════════════════ -->
+        <section id="testimonials">
+            <span class="section-label reveal-up">Client Reviews</span>
+            <h2 class="section-title reveal-up">What Clients <span>Say</span></h2>
+            <div class="testimonials-track" id="testimonials-track"></div>
+        </section>
+
+        <!-- ══════════════════════════ WORKFLOW ══════════════════════════ -->
+        <section id="workflow">
+            <div style="max-width:1200px;margin:0 auto">
+                <span class="section-label reveal-up">My Process</span>
+                <h2 class="section-title reveal-up">How We <span>Work Together</span></h2>
+                <p class="section-desc reveal-up">A transparent, collaborative workflow designed to make the entire
+                    process smooth and stress-free for you.</p>
+                <div class="workflow-steps">
+                    <div class="workflow-step reveal-up">
+                        <div class="step-num">01</div>
+                        <div class="step-icon">💬</div>
+                        <div class="step-title">Discovery</div>
+                        <p class="step-desc">We discuss your vision, goals, audience, and creative direction in detail.
+                        </p>
+                    </div>
+                    <div class="workflow-step reveal-up">
+                        <div class="step-num">02</div>
+                        <div class="step-icon">📋</div>
+                        <div class="step-title">Planning</div>
+                        <p class="step-desc">I create an edit plan, mood board, and timeline proposal for your approval.
+                        </p>
+                    </div>
+                    <div class="workflow-step reveal-up">
+                        <div class="step-num">03</div>
+                        <div class="step-icon">✂️</div>
+                        <div class="step-title">Editing</div>
+                        <p class="step-desc">Raw footage is assembled, paced, coloured, and scored with precision.</p>
+                    </div>
+                    <div class="workflow-step reveal-up">
+                        <div class="step-num">04</div>
+                        <div class="step-icon">👁️</div>
+                        <div class="step-title">Review</div>
+                        <p class="step-desc">You receive a watermarked preview draft and leave your detailed feedback.
+                        </p>
+                    </div>
+                    <div class="workflow-step reveal-up">
+                        <div class="step-num">05</div>
+                        <div class="step-icon">🔄</div>
+                        <div class="step-title">Revisions</div>
+                        <p class="step-desc">Refinements are made based on your feedback until perfect (up to 3 rounds).
+                        </p>
+                    </div>
+                    <div class="workflow-step reveal-up">
+                        <div class="step-num">06</div>
+                        <div class="step-icon">🚀</div>
+                        <div class="step-title">Delivery</div>
+                        <p class="step-desc">Final files delivered in your preferred formats via Google Drive within the
+                            agreed timeline.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════ PRICING ══════════════════════════ -->
+        <section id="pricing">
+            <div style="max-width:1100px;margin:0 auto">
+                <span class="section-label reveal-up">Packages</span>
+                <h2 class="section-title reveal-up">Transparent <span>Pricing</span></h2>
+                <p class="section-desc reveal-up">Straightforward packages for every scale of project. Custom quotes
+                    available on request.</p>
+                <div class="pricing-grid reveal-up">
+                    <!-- Basic -->
+                    <div class="pricing-card">
+                        <div class="pricing-tier">Basic</div>
+                        <div class="pricing-price"><sup>₹</sup>5,000<span>/video</span></div>
+                        <p class="pricing-desc">Perfect for short-form social content and simple narratives.</p>
+                        <div class="pricing-divider"></div>
+                        <ul class="pricing-features">
+                            <li>Up to 5-minute edit</li>
+                            <li>Colour correction</li>
+                            <li>Background music</li>
+                            <li>Captions &amp; subtitles</li>
+                            <li>2 revision rounds</li>
+                            <li>5-day delivery</li>
+                            <li class="no">Motion graphics</li>
+                            <li class="no">Sound design</li>
+                        </ul>
+                        <a href="#contact" class="btn-outline pricing-cta">Get Started</a>
+                    </div>
+                    <!-- Standard (Featured) -->
+                    <div class="pricing-card featured">
+                        <div class="pricing-badge">Most Popular</div>
+                        <div class="pricing-tier">Standard</div>
+                        <div class="pricing-price"><sup>₹</sup>15,000<span>/video</span></div>
+                        <p class="pricing-desc">Ideal for YouTube content, events, and short brand films.</p>
+                        <div class="pricing-divider"></div>
+                        <ul class="pricing-features">
+                            <li>Up to 20-minute edit</li>
+                            <li>Cinematic colour grade</li>
+                            <li>Licensed music</li>
+                            <li>Motion graphics &amp; titles</li>
+                            <li>Sound design</li>
+                            <li>3 revision rounds</li>
+                            <li>7-day delivery</li>
+                            <li class="no">Commercial licence</li>
+                        </ul>
+                        <a href="#contact" class="btn-primary pricing-cta" style="text-align:center;display:block">Book
+                            Now</a>
+                    </div>
+                    <!-- Premium -->
+                    <div class="pricing-card">
+                        <div class="pricing-tier">Premium</div>
+                        <div class="pricing-price"><sup>₹</sup>35,000<span>/video</span></div>
+                        <p class="pricing-desc">For high-end commercials, weddings, and corporate productions.</p>
+                        <div class="pricing-divider"></div>
+                        <ul class="pricing-features">
+                            <li>Unlimited length</li>
+                            <li>Advanced colour science</li>
+                            <li>Original sound design</li>
+                            <li>Full motion graphics</li>
+                            <li>VFX &amp; compositing</li>
+                            <li>Unlimited revisions</li>
+                            <li>Commercial licence</li>
+                            <li>Priority 3-day delivery</li>
+                        </ul>
+                        <a href="#contact" class="btn-outline pricing-cta">Get Started</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════ STATS ══════════════════════════ -->
+        <section id="stats">
+            <div class="stats-grid">
+                <div class="reveal-up">
+                    <div class="stat-num" data-count="500" data-suffix="+">0+</div>
+                    <div class="stat-label">Videos Edited</div>
+                </div>
+                <div class="reveal-up">
+                    <div class="stat-num" data-count="150" data-suffix="+">0+</div>
+                    <div class="stat-label">Happy Clients</div>
+                </div>
+                <div class="reveal-up">
+                    <div class="stat-num" data-count="5" data-suffix="+">0+</div>
+                    <div class="stat-label">Years Experience</div>
+                </div>
+                <div class="reveal-up">
+                    <div class="stat-num" data-count="50" data-suffix="+">0+</div>
+                    <div class="stat-label">Awards &amp; Recognitions</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════ CONTACT ══════════════════════════ -->
+        <section id="contact">
+            <div style="max-width:1100px;margin:0 auto">
+                <span class="section-label reveal-up">Get In Touch</span>
+                <h2 class="section-title reveal-up">Let's Create <span>Something</span> Great</h2>
+                <p class="section-desc reveal-up">Available for freelance projects globally. Typically respond within 24
+                    hours.</p>
+                <div class="contact-grid">
+                    <!-- Form -->
+                    <!--
+          FORMSPREE SETUP:
+          1. Go to https://formspree.io → Sign up free
+          2. Click "New Form" → name it "Portfolio Inquiries"
+          3. Copy your Form ID (e.g. xpzgkdlv)
+          4. Replace YOUR_FORM_ID below with your actual ID
+          5. In Formspree dashboard → Settings → enable "Auto-Reply" and paste the greeting template
+        -->
+                    <form class="contact-form reveal-up" id="contact-form" action="https://formspree.io/f/YOUR_FORM_ID"
+                        method="POST" novalidate>
+
+                        <!-- Formspree: send auto-reply to visitor's email -->
+                        <input type="hidden" name="_replyto" id="_replyto" />
+                        <!-- Formspree: custom subject line for your inbox -->
+                        <input type="hidden" name="_subject" id="_subject" value="🎬 New Portfolio Inquiry" />
+                        <!-- Tracking: browser, device, timestamp (filled by JS) -->
+                        <input type="hidden" name="_source_page" value="Portfolio Website" />
+                        <input type="hidden" name="submitted_at" id="submitted_at" />
+                        <input type="hidden" name="visitor_device" id="visitor_device" />
+                        <!-- Honeypot spam trap (Formspree ignores this if filled by bots) -->
+                        <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="f-name">Full Name</label>
+                                <input type="text" id="f-name" name="name" placeholder="Your name" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="f-email">Email Address</label>
+                                <input type="email" id="f-email" name="email" placeholder="your@email.com" required />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="f-phone">Phone / WhatsApp (optional)</label>
+                                <input type="tel" id="f-phone" name="phone" placeholder="+91 98765 43210" />
+                            </div>
+                            <div class="form-group">
+                                <label for="f-budget">Budget Range</label>
+                                <select id="f-budget" name="budget">
+                                    <option value="Under ₹5,000">Under ₹5,000</option>
+                                    <option value="₹5,000 – ₹15,000">₹5,000 – ₹15,000</option>
+                                    <option value="₹15,000 – ₹35,000" selected>₹15,000 – ₹35,000</option>
+                                    <option value="₹35,000+">₹35,000+</option>
+                                    <option value="Discuss">Let's Discuss</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="f-project">Project Type</label>
+                            <select id="f-project" name="project">
+                                <option value="YouTube Video">YouTube Video Editing</option>
+                                <option value="Instagram Reels">Instagram Reels / Shorts</option>
+                                <option value="Commercial Ad">Commercial Advertisement</option>
+                                <option value="Wedding Film">Wedding / Event Film</option>
+                                <option value="Motion Graphics">Motion Graphics</option>
+                                <option value="Corporate Video">Corporate Video</option>
+                                <option value="Podcast Editing">Podcast Editing</option>
+                                <option value="Colour Grading">Colour Grading Only</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="f-deadline">Deadline</label>
+                            <input type="text" id="f-deadline" name="deadline"
+                                placeholder="e.g. Within 2 weeks, or specific date" />
+                        </div>
+                        <div class="form-group">
+                            <label for="f-message">Project Details</label>
+                            <textarea id="f-message" name="message" rows="5"
+                                placeholder="Tell me about your project — vision, deadline, budget, deliverables..."></textarea>
+                        </div>
+                        <div class="form-status" id="form-status"></div>
+                        <button type="submit" class="btn-primary" id="form-submit" style="align-self:flex-start">Send
+                            Message ✉</button>
+                    </form>
+
+                    <!-- Contact Info -->
+                    <div class="contact-info reveal-up">
+                        <div class="contact-info-card">
+                            <div class="contact-icon">📧</div>
+                            <div>
+                                <div class="contact-info-label">Email</div>
+                                <div class="contact-info-value">manav@example.com</div>
+                            </div>
+                        </div>
+                        <div class="contact-info-card">
+                            <div class="contact-icon">📍</div>
+                            <div>
+                                <div class="contact-info-label">Location</div>
+                                <div class="contact-info-value">India · Remote Worldwide</div>
+                            </div>
+                        </div>
+                        <div class="contact-info-card">
+                            <div class="contact-icon">⏱️</div>
+                            <div>
+                                <div class="contact-info-label">Response Time</div>
+                                <div class="contact-info-value">Within 24 Hours</div>
+                            </div>
+                        </div>
+                        <a href="https://wa.me/917874712872?text=Hi%2C%20I%20found%20your%20portfolio%20and%20would%20like%20to%20discuss%20a%20project."
+                            target="_blank" rel="noopener" class="whatsapp-btn">
+                            💬 Chat on WhatsApp
+                        </a>
+                        <div style="margin-top:4px">
+                            <div
+                                style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;letter-spacing:0.1em;text-transform:uppercase">
+                                Follow My Work</div>
+                            <div class="social-grid">
+                                <a href="https://www.instagram.com/shraddha_videology" target="_blank" rel="noopener"
+                                    class="social-link" aria-label="Instagram"><span>📸</span>Instagram</a>
+                                <a href="#" class="social-link" aria-label="YouTube"><span>▶️</span>YouTube</a>
+                                <a href="#" class="social-link" aria-label="LinkedIn"><span>💼</span>LinkedIn</a>
+                                <a href="#" class="social-link" aria-label="Behance"><span>🎨</span>Behance</a>
+                                <a href="#" class="social-link" aria-label="Vimeo"><span>🎬</span>Vimeo</a>
+                                <a href="#" class="social-link" aria-label="Twitter"><span>🐦</span>Twitter</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════ FOOTER ══════════════════════════ -->
+        <footer>
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <a href="#hero" class="nav-logo">M.</a>
+                    <p class="footer-tagline">Professional Video Editor &amp; Visual Storyteller crafting cinematic
+                        stories frame by frame.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-col">
+                        <h4>Navigate</h4>
+                        <ul>
+                            <li><a href="#about">About</a></li>
+                            <li><a href="#skills">Skills</a></li>
+                            <li><a href="#services">Services</a></li>
+                            <li><a href="#portfolio">Portfolio</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Services</h4>
+                        <ul>
+                            <li><a href="#services">YouTube Editing</a></li>
+                            <li><a href="#services">Reels &amp; Shorts</a></li>
+                            <li><a href="#services">Wedding Films</a></li>
+                            <li><a href="#services">Colour Grading</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Connect</h4>
+                        <ul>
+                            <li><a href="#contact">Hire Me</a></li>
+                            <li><a href="#showreel">Showreel</a></li>
+                            <li><a href="#pricing">Pricing</a></li>
+                            <li><a href="mailto:manav@example.com">Email Me</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-copy">© 2024 Manav. All rights reserved. Crafted with ❤️ &amp; cinematography.</div>
+                <div class="footer-socials">
+                    <a href="https://www.instagram.com/shraddha_videology" target="_blank" rel="noopener"
+                        aria-label="Instagram">📸</a>
+                    <a href="#" aria-label="YouTube">▶</a>
+                    <a href="#" aria-label="LinkedIn">💼</a>
+                    <a href="#" aria-label="Vimeo">🎬</a>
+                </div>
+            </div>
+        </footer>
+
+    </div><!-- /main-site -->
+
+    <!-- ══════════════════════════ PORTFOLIO MODAL ══════════════════════════ -->
+    <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-label="Project Details">
+        <div class="modal-box">
+            <button class="modal-close" aria-label="Close modal">✕</button>
+            <div class="modal-video">
+                <iframe allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen
+                    title="Project video"></iframe>
+            </div>
+            <div class="modal-info">
+                <div class="modal-title"></div>
+                <div class="modal-meta">
+                    <span>Category: <strong class="modal-cat"></strong></span>
+                    <span>Client: <strong class="modal-client"></strong></span>
+                    <span>Tools: <strong class="modal-tools"></strong></span>
+                </div>
+                <p class="modal-desc"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
