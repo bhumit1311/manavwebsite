@@ -6,16 +6,16 @@
 
 // ─── Portfolio Data ──────────────────────────────────
 const PORTFOLIO = [
-    { id: 1, title: 'Fortune Air Diwali Reel', category: 'commercial', tools: 'Premiere Pro, After Effects', client: 'Fortune Air', desc: 'High-energy Diwali commercial reel for Fortune Air — vibrant colour grading and dynamic cuts.', mp4: 'videos/FORTUNE AIR DIWALI REEL-1.mp4', emoji: '🎬' },
-    { id: 2, title: 'Hiren & Krishna Teaser', category: 'wedding', tools: 'DaVinci Resolve, Premiere', client: 'Hiren & Krishna', desc: 'A cinematic wedding teaser capturing love, rituals and raw emotions with a contemporary cinematic grade.', mp4: 'videos/HIREN & KRISHNA TEASER.mp4', emoji: '💍' },
-    { id: 3, title: 'Jayneel Riya Reel', category: 'wedding', tools: 'Premiere Pro, After Effects', client: 'Jayneel & Riya', desc: 'Short-form wedding reel highlighting the best moments from a beautiful ceremony and reception.', mp4: 'videos/Jayneel Riya reel.mp4', emoji: '💒' },
-    { id: 4, title: 'Nazarbaug Diwali Reel', category: 'commercial', tools: 'Premiere Pro, Photoshop', client: 'Nazarbaug', desc: 'Festive Diwali promotional reel for Nazarbaug — warm tones, quick cuts and celebratory energy.', mp4: 'videos/NAZARBAUG DIWALI REEL_1.mp4', emoji: '🪔' },
-    { id: 5, title: 'Neimish Creative Reel', category: 'youtube', tools: 'After Effects, Premiere', client: 'Neimish', desc: 'A dynamic creative reel showcasing visual storytelling through fast-paced editing and motion graphics.', mp4: 'videos/Neimish_20260122_002210_0000.mp4', emoji: '📱' },
-    { id: 6, title: 'Shreenand New Reel', category: 'youtube', tools: 'Premiere, Motion Graphics', client: 'Shreenand', desc: 'Modern lifestyle reel with slick transitions, colour science and branded motion graphics.', mp4: 'videos/SHREENAND NEW REEL01  1.mp4', emoji: '🎥' },
-    { id: 7, title: 'Sequence Edit', category: 'corporate', tools: 'Premiere Pro, After Effects', client: 'Studio Project', desc: 'A polished sequence edit demonstrating professional multi-camera workflow and colour consistency.', mp4: 'videos/Sequence 01.mp4', emoji: '🏢' },
-    { id: 8, title: 'Engagement Reel', category: 'wedding', tools: 'DaVinci Resolve', client: 'Engagement Film', desc: 'Emotion-filled engagement reel with soft, romantic colour grade capturing every candid moment.', mp4: 'videos/engagement reel.mp4', emoji: '💑' },
-    { id: 9, title: 'Final Reel', category: 'commercial', tools: 'Premiere Pro, After Effects', client: 'Studio Showcase', desc: 'A studio showreel demonstrating range across commercial, wedding and lifestyle productions.', mp4: 'videos/final reel.mp4', emoji: '🌟' },
-    { id: 10, title: 'Pure Dental Opening Reel', category: 'corporate', tools: 'Premiere Pro, After Effects', client: 'Pure Dental', desc: 'Grand opening promotional reel for Pure Dental Clinic — clean aesthetics, professional grade and brand-aligned visuals.', mp4: 'videos/pure dental opening reel.mp4', emoji: '🦷' },
+    { id: 1, title: 'Fortune Air Diwali Reel', category: 'commercial', tools: 'Premiere Pro, After Effects', client: 'Fortune Air', desc: 'High-energy Diwali commercial reel for Fortune Air — vibrant colour grading and dynamic cuts.', driveId: '19aApncxKmJWu9k17OfMq3gJWkmTsZklk', emoji: '🎬' },
+    { id: 2, title: 'Hiren & Krishna Teaser', category: 'wedding', tools: 'DaVinci Resolve, Premiere', client: 'Hiren & Krishna', desc: 'A cinematic wedding teaser capturing love, rituals and raw emotions with a contemporary cinematic grade.', driveId: '1AAMiyFRUKuWvbDXsQ2ASkR0RjDY6lcnV', emoji: '💍' },
+    { id: 3, title: 'Jayneel Riya Reel', category: 'wedding', tools: 'Premiere Pro, After Effects', client: 'Jayneel & Riya', desc: 'Short-form wedding reel highlighting the best moments from a beautiful ceremony and reception.', driveId: '15htJKfeIgUdah-TIWY4hTf_J_UnjGfpJ', emoji: '💒' },
+    { id: 4, title: 'Nazarbaug Diwali Reel', category: 'commercial', tools: 'Premiere Pro, Photoshop', client: 'Nazarbaug', desc: 'Festive Diwali promotional reel for Nazarbaug — warm tones, quick cuts and celebratory energy.', driveId: '1Cv51cMYD_dkcGAJnldKMDlb99buhNXjz', emoji: '🪔' },
+    { id: 5, title: 'Neimish Creative Reel', category: 'youtube', tools: 'After Effects, Premiere', client: 'Neimish', desc: 'A dynamic creative reel showcasing visual storytelling through fast-paced editing and motion graphics.', driveId: '1E2oSq-6N9FZ5lFnVEHArXERmR5Xa4ilu', emoji: '📱' },
+    { id: 6, title: 'Shreenand New Reel', category: 'youtube', tools: 'Premiere, Motion Graphics', client: 'Shreenand', desc: 'Modern lifestyle reel with slick transitions, colour science and branded motion graphics.', driveId: '1iN4Y4HUstrZSEgx3E1sXFT8CE31CIxii', emoji: '🎥' },
+    { id: 7, title: 'Sequence Edit', category: 'corporate', tools: 'Premiere Pro, After Effects', client: 'Studio Project', desc: 'A polished sequence edit demonstrating professional multi-camera workflow and colour consistency.', driveId: '150Wuos1yDQy6GqijErZOovu3EFl4Y3tS', emoji: '🏢' },
+    { id: 8, title: 'Engagement Reel', category: 'wedding', tools: 'DaVinci Resolve', client: 'Engagement Film', desc: 'Emotion-filled engagement reel with soft, romantic colour grade capturing every candid moment.', driveId: '10Y9p3VupK7OYf-aajIGyXXnBS1BOLUoW', emoji: '💑' },
+    { id: 9, title: 'Final Reel', category: 'commercial', tools: 'Premiere Pro, After Effects', client: 'Studio Showcase', desc: 'A studio showreel demonstrating range across commercial, wedding and lifestyle productions.', driveId: '1mNZxiQrEtQaVgLbBra-7_jDwv4QdP8rf', emoji: '🌟' },
+    { id: 10, title: 'Pure Dental Opening Reel', category: 'corporate', tools: 'Premiere Pro, After Effects', client: 'Pure Dental', desc: 'Grand opening promotional reel for Pure Dental Clinic — clean aesthetics, professional grade and brand-aligned visuals.', driveId: '1MN39UX73rPlhKgGNx1hk1JQq6TUs-7QY', emoji: '🦷' },
 ];
 
 const TESTIMONIALS = [
@@ -475,12 +475,16 @@ function openModal(item) {
     overlay.querySelector('.modal-cat').textContent = item.category.toUpperCase();
     overlay.querySelector('.modal-desc').textContent = item.desc;
 
-    // Replace iframe with local video player
+    // Use Google Drive iframe — works on any device, no local files needed
     const videoWrap = overlay.querySelector('.modal-video');
     videoWrap.innerHTML = `
-        <video controls autoplay style="width:100%;height:100%;object-fit:contain;border-radius:8px;background:#000">
-            <source src="${item.mp4}" type="video/mp4" />
-        </video>
+        <iframe
+            id="modal-drive-iframe"
+            src="https://drive.google.com/file/d/${item.driveId}/preview"
+            style="width:100%;height:100%;border:none;border-radius:8px;background:#000"
+            allow="autoplay; fullscreen"
+            allowfullscreen
+        ></iframe>
     `;
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -490,11 +494,11 @@ function closeModal() {
     const overlay = document.getElementById('modal-overlay');
     if (!overlay) return;
     overlay.classList.remove('open');
-    // Stop any playing video
-    const video = overlay.querySelector('video');
-    if (video) video.pause();
+    // Clear iframe src to stop Drive video playback
+    const iframe = overlay.querySelector('#modal-drive-iframe');
+    if (iframe) iframe.src = '';
     const videoWrap = overlay.querySelector('.modal-video');
-    if (videoWrap) videoWrap.innerHTML = '<video controls></video>';
+    if (videoWrap) videoWrap.innerHTML = '';
     document.body.style.overflow = '';
 }
 
