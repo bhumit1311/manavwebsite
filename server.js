@@ -36,14 +36,14 @@ function emailReady() {
 
 async function sendNewInquiryEmail(data) {
   if (!emailReady()) {
-    console.log('⚠️  Email skipped — configure GMAIL_PASS in server.js');
+    console.log('⚠️  Admin email skipped — configure GMAIL_PASS in Render environment variables');
     return;
   }
   const { name, email, phone, project, message } = data;
   const html = `
         <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#0a0a0f;color:#f0f0f0;border-radius:12px;overflow:hidden">
             <div style="background:#e8b86d;padding:24px 28px">
-                <h2 style="margin:0;color:#0a0a0f;font-size:1.2rem">🎬 New Inquiry — Shraddha Videology</h2>
+                <h2 style="margin:0;color:#0a0a0f;font-size:1.2rem">🎥 New Inquiry — Shraddha Videology</h2>
             </div>
             <div style="padding:28px">
                 <table style="width:100%;border-collapse:collapse">
@@ -60,7 +60,7 @@ async function sendNewInquiryEmail(data) {
                     ${email ? `<a href="mailto:${email}?subject=Re: Your Inquiry — Shraddha Videology&body=Hi ${name},%0A%0AThank you for reaching out!" style="background:#e8b86d;color:#000;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:0.88rem">📧 Reply via Email</a>` : ''}
                     ${phone ? `<a href="https://wa.me/91${(phone).replace(/\D/g, '')}" style="background:#25d366;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:0.88rem">💬 WhatsApp</a>` : ''}
                 </div>
-                <p style="margin-top:24px;color:#555;font-size:0.75rem">Sent by your portfolio server • View all submissions at <a href="http://localhost:3001/admin.html" style="color:#e8b86d">admin panel</a></p>
+                <p style="margin-top:24px;color:#555;font-size:0.75rem">Sent by Shraddha Videology Portfolio</p>
             </div>
         </div>
     `;
@@ -70,7 +70,58 @@ async function sendNewInquiryEmail(data) {
     subject: `📬 New Inquiry: ${project || 'General'} from ${name}`,
     html
   });
-  console.log(`✉️  Email sent to ${NOTIFY_TO}`);
+  console.log(`✉️  Admin notification sent to ${NOTIFY_TO}`);
+}
+
+async function sendAutoReplyEmail(data) {
+  if (!emailReady()) return;
+  const { name, email, project } = data;
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#0a0a0f;color:#f0f0f0;border-radius:16px;overflow:hidden">
+      <div style="background:linear-gradient(135deg,#e8b86d,#c9922a);padding:32px 28px;text-align:center">
+        <div style="font-size:2rem;margin-bottom:8px">🎥</div>
+        <h2 style="margin:0;color:#0a0a0f;font-size:1.4rem;font-weight:800">Shraddha Videology</h2>
+        <p style="margin:4px 0 0;color:#0a0a0f;opacity:0.7;font-size:0.85rem">Thank you for reaching out!</p>
+      </div>
+      <div style="padding:32px 28px">
+        <p style="font-size:1.05rem;margin-top:0">Hi <strong>${name}</strong> 👋</p>
+        <p style="line-height:1.8;color:#ddd">
+          Thank you so much for getting in touch with us! We have successfully received your inquiry
+          ${project ? `about <strong style="color:#e8b86d">${project}</strong>` : ''} and are thrilled about the possibility of working together.
+        </p>
+        <div style="background:#111827;border-left:4px solid #e8b86d;border-radius:8px;padding:18px 20px;margin:24px 0">
+          <p style="margin:0;font-size:0.95rem;color:#e8b86d;font-weight:700">⏰ What happens next?</p>
+          <p style="margin:10px 0 0;color:#ccc;line-height:1.7;font-size:0.9rem">
+            Our team will personally review your project details and get back to you within <strong style="color:#fff">24 hours</strong>.
+            We look forward to discussing how we can bring your vision to life!
+          </p>
+        </div>
+        <p style="line-height:1.8;color:#aaa;font-size:0.88rem">
+          In the meantime, feel free to explore our latest work on our portfolio or reach out to us directly:
+        </p>
+        <div style="display:flex;gap:10px;margin:20px 0">
+          <a href="mailto:shraddhavideology@gmail.com" style="background:#1a1a2e;color:#e8b86d;border:1px solid #e8b86d;padding:10px 18px;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:600">📧 Email Us</a>
+          <a href="https://wa.me/917874712871" style="background:#25d366;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:600">💬 WhatsApp</a>
+        </div>
+        <p style="color:#ddd;line-height:1.7;margin-bottom:0">
+          Warm regards,<br/>
+          <strong style="color:#e8b86d">Shraddha</strong><br/>
+          <span style="color:#aaa;font-size:0.85rem">Shraddha Videology &amp; Production</span>
+        </p>
+      </div>
+      <div style="background:#050508;padding:16px 28px;text-align:center">
+        <p style="margin:0;color:#444;font-size:0.75rem">© 2025 Shraddha Videology. shraddhavideology@gmail.com</p>
+      </div>
+    </div>
+  `;
+  await transporter.sendMail({
+    from: `"Shraddha Videology" <${GMAIL_USER}>`,
+    to: email,
+    replyTo: GMAIL_USER,
+    subject: `🎥 We received your inquiry, ${name}! — Shraddha Videology`,
+    html
+  });
+  console.log(`✉️  Auto-reply sent to ${email}`);
 }
 
 // ════════════════════════════════════════════════════════
@@ -170,9 +221,13 @@ app.post('/api/contact', async (req, res) => {
     );
     console.log(`📬 New submission #${result.lastID}: ${name} <${email}>`);
 
-    // 2. Send email notification (non-blocking — won't break the form if email fails)
+    // 2. Send admin notification email (non-blocking)
     sendNewInquiryEmail({ name, email, phone, project, message })
-      .catch(err => console.error('⚠️  Email error:', err.message));
+      .catch(err => console.error('⚠️  Admin email error:', err.message));
+
+    // 3. Send auto-reply to visitor (non-blocking)
+    sendAutoReplyEmail({ name, email, project })
+      .catch(err => console.error('⚠️  Auto-reply error:', err.message));
 
     res.json({ ok: true, id: result.lastID });
   } catch (e) { res.status(500).json({ error: e.message }); }

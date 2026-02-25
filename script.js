@@ -585,24 +585,31 @@ function setupContactForm() {
         const phone = (form.querySelector('[name="phone"]') || {}).value || '';
         const message = (form.querySelector('[name="message"]') || {}).value || '';
 
-        // ── Web3Forms submission (works without any server, free forever) ──
+        // ── 1. Send to Render server: DB save + admin email + auto-reply to visitor ──
+        const RENDER_SERVER = 'https://shraddhavideology.onrender.com';
+        let serverSaved = false;
+        try {
+            const srvRes = await fetch(`${RENDER_SERVER}/api/contact`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, phone, project, message }),
+                signal: AbortSignal.timeout(8000)
+            });
+            if (srvRes.ok) serverSaved = true;
+        } catch (_) { /* server offline — fallback below */ }
+
+        // ── 2. Web3Forms: admin backup notification ──
         const WEB3_KEY = '03515a5e-8b0a-4244-af94-60de8fbbb772';
 
         let submitted = false;
         try {
             const payload = {
                 access_key: WEB3_KEY,
-                name,
-                email,
-                phone,
+                name, email, phone,
                 subject: `🎬 New Inquiry: ${project || 'General'} from ${name}`,
                 message: `Name: ${name}\nEmail: ${email}\nPhone: ${phone || 'Not provided'}\nProject: ${project || 'Not specified'}\n\nMessage:\n${message}`,
-                // Auto-reply greeting sent to the visitor
                 replyto: email,
                 from_name: 'Shraddha Videology',
-                // Web3Forms auto-reply config
-                autoresponse: true,
-                autoresponse_message: `Hi ${name}! 👋\n\nThank you for reaching out to Shraddha Videology!\n\nWe've received your inquiry about "${project || 'your project'}" and will get back to you within 24 hours.\n\nHere's a copy of your message:\n"${message}"\n\nLooking forward to creating something amazing together! 🎬\n\nWarm regards,\nShraddha Videology Team\nshraddhavideology@gmail.com`,
             };
 
             const res = await fetch('https://api.web3forms.com/submit', {
@@ -613,6 +620,7 @@ function setupContactForm() {
             const data = await res.json();
             if (data.success) submitted = true;
         } catch (_) { /* network error — will use mailto fallback */ }
+
 
         if (submitted) {
             form.reset();
