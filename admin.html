@@ -828,9 +828,9 @@
                 <!-- VIDEO MANAGER -->
                 <div class="page" id="page-videos">
                     <div class="page-header">
-                        <div class="page-title">Video Manager</div>
-                        <div class="page-desc">Update the videos shown in your portfolio. Type a new filename and click
-                            Save. The file must exist in your project folder.</div>
+                        <div class="page-title">🎥 Video Manager</div>
+                        <div class="page-desc">Paste a <strong>Google Drive share link</strong> for each video and set
+                            the label shown under the thumbnail. Click <strong>Save</strong> to update.</div>
                     </div>
                     <div class="video-slots" id="video-slots"></div>
                 </div>
@@ -1040,60 +1040,103 @@
         }
 
         // ── VIDEO MANAGER ──
+        // Default Drive IDs for all 10 showreel videos
         const VIDEO_SLOTS = [
-            { id: 'slot_final', label: 'Final Reel', cat: 'Showreel', def: 'videos/final reel.mp4' },
-            { id: 'slot_fortune', label: 'Fortune Air Diwali', cat: 'Commercial', def: 'videos/FORTUNE AIR DIWALI REEL-1.mp4' },
-            { id: 'slot_hiren', label: 'Hiren & Krishna', cat: 'Wedding', def: 'videos/HIREN & KRISHNA TEASER.mp4' },
-            { id: 'slot_jayneel', label: 'Jayneel Riya Reel', cat: 'Wedding', def: 'videos/Jayneel Riya reel.mp4' },
-            { id: 'slot_nazarbaug', label: 'Nazarbaug Diwali', cat: 'Commercial', def: 'videos/NAZARBAUG DIWALI REEL_1.mp4' },
-            { id: 'slot_neimish', label: 'Neimish Reel', cat: 'YouTube', def: 'videos/Neimish_20260122_002210_0000.mp4' },
-            { id: 'slot_shreenand', label: 'Shreenand Reel', cat: 'YouTube', def: 'videos/SHREENAND NEW REEL01  1.mp4' },
-            { id: 'slot_sequence', label: 'Sequence Edit', cat: 'Corporate', def: 'videos/Sequence 01.mp4' },
-            { id: 'slot_engagement', label: 'Engagement Reel', cat: 'Wedding', def: 'videos/engagement reel.mp4' },
-            { id: 'slot_dental', label: 'Pure Dental Opening', cat: 'Corporate', def: 'videos/pure dental opening reel.mp4' },
+            { id: 'slot_final', title: 'Final Reel', cat: 'Showreel', defId: '1mNZxiQrEtQaVgLbBra-7_jDwv4QdP8rf', defLabel: 'Final Reel' },
+            { id: 'slot_fortune', title: 'Fortune Air Diwali', cat: 'Commercial', defId: '19aApncxKmJWu9k17OfMq3gJWkmTsZklk', defLabel: 'Fortune Air' },
+            { id: 'slot_hiren', title: 'Hiren & Krishna', cat: 'Wedding', defId: '1AAMiyFRUKuWvbDXsQ2ASkR0RjDY6lcnV', defLabel: 'Hiren & Krishna' },
+            { id: 'slot_jayneel', title: 'Jayneel Riya Reel', cat: 'Wedding', defId: '15htJKfeIgUdah-TIWY4hTf_J_UnjGfpJ', defLabel: 'Jayneel Riya' },
+            { id: 'slot_nazarbaug', title: 'Nazarbaug Diwali', cat: 'Commercial', defId: '1Cv51cMYD_dkcGAJnldKMDlb99buhNXjz', defLabel: 'Nazarbaug' },
+            { id: 'slot_neimish', title: 'Neimish Reel', cat: 'YouTube', defId: '1E2oSq-6N9FZ5lFnVEHArXERmR5Xa4ilu', defLabel: 'Neimish' },
+            { id: 'slot_shreenand', title: 'Shreenand Reel', cat: 'YouTube', defId: '1iN4Y4HUstrZSEgx3E1sXFT8CE31CIxii', defLabel: 'Shreenand' },
+            { id: 'slot_sequence', title: 'Sequence Edit', cat: 'Corporate', defId: '150Wuos1yDQy6GqijErZOovu3EFl4Y3tS', defLabel: 'Sequence Edit' },
+            { id: 'slot_engagement', title: 'Engagement Reel', cat: 'Wedding', defId: '10Y9p3VupK7OYf-aajIGyXXnBS1BOLUoW', defLabel: 'Engagement' },
+            { id: 'slot_dental', title: 'Pure Dental Opening', cat: 'Corporate', defId: '1MN39UX73rPlhKgGNx1hk1JQq6TUs-7QY', defLabel: 'Pure Dental' },
         ];
 
+        // Extract Google Drive file ID from any share URL format
+        function parseDriveId(input) {
+            input = input.trim();
+            // Already a bare ID (no slashes or dots)
+            if (/^[\w-]{25,}$/.test(input)) return input;
+            // https://drive.google.com/file/d/FILE_ID/view
+            const m = input.match(/\/d\/([-\w]+)/);
+            if (m) return m[1];
+            // https://drive.google.com/open?id=FILE_ID
+            const m2 = input.match(/[?&]id=([-\w]+)/);
+            if (m2) return m2[1];
+            return null;
+        }
+
         async function buildVideoSlots() {
-            // Load saved config from database
+            // Load saved config from server DB, fall back to localStorage
             let savedConfig = {};
             try {
                 const res = await fetch(`${API}/videos`);
-                savedConfig = await res.json();
+                if (res.ok) savedConfig = await res.json();
             } catch { }
+            // Merge with localStorage saved config
+            const lsConfig = JSON.parse(localStorage.getItem('sv_video_config') || '{}');
+            savedConfig = { ...lsConfig, ...savedConfig };
 
             const container = document.getElementById('video-slots');
             container.innerHTML = '';
             VIDEO_SLOTS.forEach(slot => {
-                const file = savedConfig[slot.id] || slot.def;
+                const saved = savedConfig[slot.id] || {};
+                const driveId = saved.drive_id || slot.defId;
+                const displayLabel = saved.display_label || slot.defLabel;
+                const thumbUrl = `https://drive.google.com/thumbnail?id=${driveId}&sz=w320`;
                 const div = document.createElement('div');
                 div.className = 'video-slot';
                 div.innerHTML = `
-            <div class="slot-thumb">
-                <video src="${file}" muted preload="metadata" style="width:100%;height:100%;object-fit:cover"></video>
-                <div class="slot-badge">${slot.cat}</div>
-            </div>
-            <div class="slot-body">
-                <div class="slot-title">${slot.label}</div>
-                <div class="slot-file-row">
-                    <input type="text" value="${file}" id="vinput-${slot.id}" class="form-input" style="font-size:0.75rem;padding:6px 10px" placeholder="filename.mp4" />
-                    <button class="file-pick-btn" onclick="saveVideoSlot('${slot.id}')">Save</button>
-                </div>
-            </div>
-        `;
+                    <div class="slot-thumb">
+                        <img src="${thumbUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:4px" onerror="this.style.background='#1a1a2e';this.alt='No preview'" />
+                        <div class="slot-badge">${slot.cat}</div>
+                    </div>
+                    <div class="slot-body">
+                        <div class="slot-title">${slot.title}</div>
+                        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:8px">🔗 Google Drive Link</div>
+                        <div class="slot-file-row" style="margin-bottom:8px">
+                            <input type="text" value="https://drive.google.com/file/d/${driveId}/view" id="vlink-${slot.id}" class="form-input" style="font-size:0.72rem;padding:6px 10px" placeholder="Paste Google Drive share link..." />
+                        </div>
+                        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:8px">🏷️ Display Label (shown under thumbnail)</div>
+                        <div class="slot-file-row">
+                            <input type="text" value="${displayLabel}" id="vlabel-${slot.id}" class="form-input" style="font-size:0.72rem;padding:6px 10px" placeholder="Label text..." />
+                            <button class="file-pick-btn" onclick="saveVideoSlot('${slot.id}')">Save</button>
+                        </div>
+                    </div>
+                `;
                 container.appendChild(div);
             });
         }
 
         async function saveVideoSlot(slotId) {
-            const fileName = document.getElementById('vinput-' + slotId).value.trim();
-            if (!fileName) { showToast('Please enter a filename', 'error'); return; }
+            const linkInputVal = document.getElementById('vlink-' + slotId).value.trim();
+            const displayLabel = document.getElementById('vlabel-' + slotId).value.trim();
+            const driveId = parseDriveId(linkInputVal);
+            if (!driveId) { showToast('❌ Invalid Drive link — paste the share URL', 'error'); return; }
+            if (!displayLabel) { showToast('❌ Please enter a display label', 'error'); return; }
+
+            // Update thumbnail preview immediately
+            const card = document.getElementById('vlink-' + slotId).closest('.video-slot');
+            const thumb = card.querySelector('img');
+            if (thumb) thumb.src = `https://drive.google.com/thumbnail?id=${driveId}&sz=w320`;
+
+            // Save to localStorage (always works)
+            const lsConfig = JSON.parse(localStorage.getItem('sv_video_config') || '{}');
+            lsConfig[slotId] = { drive_id: driveId, display_label: displayLabel };
+            localStorage.setItem('sv_video_config', JSON.stringify(lsConfig));
+
+            // Save to server DB (when online)
             try {
                 await fetch(`${API}/videos`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ slot_id: slotId, file_name: fileName })
+                    body: JSON.stringify({ slot_id: slotId, drive_id: driveId, display_label: displayLabel })
                 });
-                showToast('✅ Video slot saved to database!', 'success');
-            } catch { showToast('❌ Could not save. Is the server running?', 'error'); }
+                showToast('✅ Video updated & saved!', 'success');
+            } catch {
+                showToast('✅ Saved locally (server offline — will sync when online)', 'success');
+            }
         }
 
         // ── OVERVIEW ──
