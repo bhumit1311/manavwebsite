@@ -908,7 +908,11 @@
 
     <script>
         'use strict';
-        const API = 'http://localhost:3001/api';
+        // Auto-detect: use local server on localhost, Render API when deployed
+        const RENDER_API_URL = 'https://shraddha-videology-api.onrender.com/api'; // ← update after Render deploy
+        const API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://localhost:3001/api'
+            : RENDER_API_URL;
         let currentUser = '';
         let allSubmissions = [];
 

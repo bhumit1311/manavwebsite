@@ -20,9 +20,9 @@ const nodemailer = require('nodemailer');
 //     How to get one → https://myaccount.google.com/apppasswords
 //     Steps: Google Account → Security → 2FA ON → App Passwords → Create
 // ═══════════════════════════════════════════════════════
-const GMAIL_USER = 'shraddhavideology@gmail.com';
-const GMAIL_PASS = 'YOUR_APP_PASSWORD_HERE';   // ← paste App Password here
-const NOTIFY_TO = 'shraddhavideology@gmail.com'; // email that gets notified
+const GMAIL_USER = process.env.GMAIL_USER || 'shraddhavideology@gmail.com';
+const GMAIL_PASS = process.env.GMAIL_PASS || '';   // Set this in Render environment variables
+const NOTIFY_TO = process.env.NOTIFY_TO || 'shraddhavideology@gmail.com';
 
 // ── Setup email transporter ───────────────────────────
 const transporter = nodemailer.createTransport({
@@ -75,7 +75,7 @@ async function sendNewInquiryEmail(data) {
 
 // ════════════════════════════════════════════════════════
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 const DB_PATH = path.join(__dirname, 'database.db');
 
 // ── Open / create database file ───────────────────────
@@ -108,7 +108,14 @@ async function initDB() {
         is_read INTEGER DEFAULT 0,
         created_at TEXT DEFAULT (datetime('now','localtime'))
     )`);
-  await run(`CREATE TABLE IF NOT EXISTS video_config (slot_id TEXT PRIMARY KEY, file_name TEXT)`);
+  await run(`CREATE TABLE IF NOT EXISTS video_config (
+        slot_id TEXT PRIMARY KEY,
+        drive_id TEXT,
+        display_label TEXT
+    )`);
+  // Migrate old schema if needed
+  try { await run(`ALTER TABLE video_config ADD COLUMN drive_id TEXT`); } catch { }
+  try { await run(`ALTER TABLE video_config ADD COLUMN display_label TEXT`); } catch { }
   await run(`CREATE TABLE IF NOT EXISTS admin_credentials (
         id INTEGER PRIMARY KEY CHECK (id = 1),
         username TEXT NOT NULL DEFAULT 'manav2109',
@@ -118,7 +125,7 @@ async function initDB() {
 }
 
 // ── Middleware ────────────────────────────────────────
-app.use(cors());
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use(express.static(__dirname));
 
@@ -215,20 +222,22 @@ app.get('/api/videos', async (req, res) => {
   try {
     const rows = await all('SELECT * FROM video_config');
     const config = {};
-    rows.forEach(r => { config[r.slot_id] = r.file_name; });
+    rows.forEach(r => {
+      config[r.slot_id] = { drive_id: r.drive_id, display_label: r.display_label };
+    });
     res.json(config);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/api/videos', async (req, res) => {
   try {
-    const { slot_id, file_name } = req.body;
-    if (!slot_id || !file_name) return res.status(400).json({ error: 'Missing fields' });
+    const { slot_id, drive_id, display_label } = req.body;
+    if (!slot_id || !drive_id) return res.status(400).json({ error: 'Missing fields' });
     await run(
-      'INSERT INTO video_config (slot_id, file_name) VALUES (?, ?) ON CONFLICT(slot_id) DO UPDATE SET file_name = excluded.file_name',
-      [slot_id, file_name]
+      'INSERT INTO video_config (slot_id, drive_id, display_label) VALUES (?, ?, ?) ON CONFLICT(slot_id) DO UPDATE SET drive_id = excluded.drive_id, display_label = excluded.display_label',
+      [slot_id, drive_id, display_label || '']
     );
-    console.log(`🎥 Video updated: ${slot_id} → ${file_name}`);
+    console.log(`🎥 Video updated: ${slot_id} → ${drive_id}`);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
