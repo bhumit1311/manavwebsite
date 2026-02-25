@@ -908,139 +908,256 @@
 
     <script>
         'use strict';
-        // Auto-detect: use local server on localhost, Render API when deployed
-        const RENDER_API_URL = 'https://shraddhavideology.onrender.com/api';
-        const API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-            ? 'http://localhost:3001/api'
-            : RENDER_API_URL;
-        let currentUser = '';
-        let allSubmissions = [];
+        // ── CONFIG ──
+        const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.startsWith('192.168.');
+        const API_BASE = isLocal ? `http://${location.hostname}:3001/api` : 'https://shraddhavideology.onrender.com/api';
+
+        // ── STATE ──
+        let currentSubmissions = [];
+        let currentFilter = 'all';
 
         // ── AUTH ──
-        let offlineMode = false;
-        // Fallback credentials (same as server defaults) for offline access
-        const OFFLINE_CREDS = { username: 'manav2109', password: 'manav@2109' };
+        function getAuthToken() {
+            return localStorage.getItem('sv_admin_token');
+        }
 
         async function doLogin() {
-            const u = document.getElementById('login-user').value.trim();
-            const p = document.getElementById('login-pass').value;
-            const errEl = document.getElementById('login-error');
-
-            let loginOk = false;
-            let serverUp = true;
+            const user = document.getElementById('login-user').value;
+            const pass = document.getElementById('login-pass').value;
+            const err = document.getElementById('login-error');
 
             try {
-                const res = await fetch(`${API}/login`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: u, password: p })
+                const res = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password: pass })
                 });
-                if (res.ok) loginOk = true;
-                else { errEl.textContent = 'Incorrect username or password'; errEl.style.display = 'block'; setTimeout(() => errEl.style.display = 'none', 3000); return; }
-            } catch {
-                // Server offline — validate locally
-                serverUp = false;
-                if (u === OFFLINE_CREDS.username && p === OFFLINE_CREDS.password) {
-                    loginOk = true;
-                    offlineMode = true;
-                } else {
-                    errEl.textContent = 'Incorrect credentials (server offline — using default credentials)';
-                    errEl.style.display = 'block';
-                    setTimeout(() => errEl.style.display = 'none', 4000);
-                    return;
-                }
-            }
+                const data = await res.json();
 
-            if (loginOk) {
-                currentUser = u;
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                document.getElementById('topbar-user').innerHTML = `Signed in as <strong>${u}</strong>`;
-                initDashboard();
+                if (data.ok) {
+                    localStorage.setItem('sv_admin_token', data.token);
+                    localStorage.setItem('sv_admin_user', data.username);
+                    initDashboard();
+                } else {
+                    err.style.display = 'block';
+                    err.innerText = data.error || 'Login failed';
+                }
+            } catch (e) {
+                err.style.display = 'block';
+                err.innerText = 'Server unreachable';
             }
         }
-
-
 
         function doLogout() {
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('login-user').value = '';
-            document.getElementById('login-pass').value = '';
+            localStorage.removeItem('sv_admin_token');
+            localStorage.removeItem('sv_admin_user');
+            location.reload();
         }
 
-        // ── SERVER STATUS MONITOR ──
-        let _srvPopoverOpen = false;
-        let _srvOnline = false;
+        // ── API HELPERS ──
+        async function apiFetch(endpoint, options = {}) {
+            const token = getAuthToken();
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        function updateServerPill(online) {
+            const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+            if (res.status === 401) {
+                doLogout();
+                throw new Error('Session expired');
+            }
+            return res;
+        }
+
+        // ── INITIALIZE ──
+        window.onload = () => {
+            const token = getAuthToken();
+            if (token) {
+                initDashboard();
+            }
+        };
+
+        async function initDashboard() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('topbar-user').innerText = localStorage.getItem('sv_admin_user') || 'Admin';
+
+            checkServerStatus();
+            loadSubmissions();
+            loadVideos();
+        }
+
+        async function checkServerStatus() {
+            const pill = document.getElementById('srv-label');
             const dot = document.getElementById('srv-dot');
-            const label = document.getElementById('srv-label');
-            const btn = document.getElementById('srv-pill-btn');
-            if (!dot) return;
-            if (online) {
-                dot.style.background = '#4ade80';
-                btn.style.background = 'rgba(74,222,128,0.1)';
-                btn.style.borderColor = 'rgba(74,222,128,0.3)';
-                btn.style.color = '#4ade80';
-                label.textContent = 'Server Online';
-                // Auto-close popover when server comes back
-                if (_srvPopoverOpen) toggleServerHelp();
-            } else {
+            const note = document.getElementById('server-note');
+
+            try {
+                const res = await fetch(`${API_BASE}/videos`);
+                if (res.ok) {
+                    pill.innerText = 'Connected';
+                    dot.style.background = '#4ade80';
+                    note.style.display = 'none';
+                } else {
+                    throw new Error();
+                }
+            } catch (e) {
+                pill.innerText = 'Offline';
                 dot.style.background = '#f87171';
-                btn.style.background = 'rgba(248,113,113,0.1)';
-                btn.style.borderColor = 'rgba(248,113,113,0.3)';
-                btn.style.color = '#f87171';
-                label.textContent = 'Server Offline';
+                note.style.display = 'block';
             }
-            _srvOnline = online;
         }
 
-        async function checkServer() {
+        // ── SUBMISSIONS ──
+        async function loadSubmissions() {
             try {
-                const r = await fetch(`${API}/videos`, { signal: AbortSignal.timeout(3000) });
-                updateServerPill(r.ok || r.status < 500);
-            } catch {
-                updateServerPill(false);
+                const res = await apiFetch('/submissions');
+                currentSubmissions = await res.json();
+                renderSubmissions();
+                updateStats();
+            } catch (e) {
+                console.error('Failed to load submissions');
             }
+        }
+
+        function renderSubmissions() {
+            const container = document.getElementById('submissions-list');
+            const filtered = currentSubmissions.filter(s => {
+                if (currentFilter === 'unread') return !s.is_read;
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="empty-state"><div class="empty-icon">📂</div>No submissions found</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(s => `
+                <div class="sub-card ${s.is_read ? '' : 'unread'}">
+                    <div class="sub-header">
+                        <div class="sub-avatar">${s.name[0].toUpperCase()}</div>
+                        <div>
+                            <div class="sub-name">${s.name}</div>
+                            <div class="sub-email">${s.email}</div>
+                        </div>
+                        <div class="sub-time">${new Date(s.created_at).toLocaleDateString()}</div>
+                    </div>
+                    <div class="sub-project"># ${s.project || 'General'}</div>
+                    <div class="sub-message">${s.message}</div>
+                    <div class="sub-phone">📞 ${s.phone || 'N/A'}</div>
+                    <div class="sub-actions">
+                        ${!s.is_read ? `<button class="sub-btn reply" onclick="markRead(${s.id})">Mark Read</button>` : ''}
+                        <button class="sub-btn delete" onclick="deleteSub(${s.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function markRead(id) {
+            await apiFetch(`/submissions/${id}/read`, { method: 'PATCH' });
+            loadSubmissions();
+            showToast('Marked as read');
+        }
+
+        async function deleteSub(id) {
+            if (!confirm('Are you sure?')) return;
+            await apiFetch(`/submissions/${id}`, { method: 'DELETE' });
+            loadSubmissions();
+            showToast('Submission deleted');
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').innerText = currentSubmissions.length;
+            const unreadCount = currentSubmissions.filter(s => !s.is_read).length;
+            document.getElementById('stat-new').innerText = unreadCount;
+            document.getElementById('sub-badge').innerText = unreadCount;
+        }
+
+        function filterSub(type, el) {
+            currentFilter = type;
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            renderSubmissions();
+        }
+
+        async function exportSubs() {
+            const token = getAuthToken();
+            window.location.href = `${API_BASE}/submissions/export?token=${token}`;
+            // Note: In a real app, you'd use a temporary download token for GET requests or a blob fetch
+        }
+
+        // ── VIDEO MANAGER ──
+        async function loadVideos() {
+            try {
+                const res = await apiFetch('/videos');
+                const config = await res.json();
+                Object.keys(config).forEach(slot => {
+                    const driveIdInput = document.querySelector(`[data-slot="${slot}"] .drive-id-input`);
+                    const labelInput = document.querySelector(`[data-slot="${slot}"] .label-input`);
+                    if (driveIdInput) driveIdInput.value = config[slot].drive_id;
+                    if (labelInput) labelInput.value = config[slot].display_label;
+                });
+            } catch (e) { }
+        }
+
+        async function saveVideoSlot(slot) {
+            const drive_id = document.querySelector(`[data-slot="${slot}"] .drive-id-input`).value;
+            const display_label = document.querySelector(`[data-slot="${slot}"] .label-input`).value;
+
+            try {
+                const res = await apiFetch('/videos', {
+                    method: 'POST',
+                    body: JSON.stringify({ slot_id: slot, drive_id, display_label })
+                });
+                if (res.ok) showToast('Video settings saved');
+            } catch (e) {
+                showToast('Save failed', 'error');
+            }
+        }
+
+        // ── SETTINGS ──
+        async function saveCredentials() {
+            const user = document.getElementById('new-user').value;
+            const pass = document.getElementById('new-pass').value;
+            const confirmPass = document.getElementById('confirm-pass').value;
+
+            if (!user || !pass || !confirmPass) return showToast('Fill all fields', 'error');
+            if (pass !== confirmPass) return showToast('Passwords do not match', 'error');
+
+            try {
+                const res = await apiFetch('/credentials', {
+                    method: 'POST',
+                    body: JSON.stringify({ username: user, password: pass })
+                });
+                if (res.ok) {
+                    showToast('Credentials updated. Please login again.');
+                    setTimeout(doLogout, 2000);
+                }
+            } catch (e) {
+                showToast('Update failed', 'error');
+            }
+        }
+
+        // ── UI HELPERS ──
+        function showPage(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`page-${id}`).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            if (el) el.classList.add('active');
+        }
+
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('admin-toast'); // Changed from 'toast' to 'admin-toast'
+            t.innerText = msg;
+            t.className = `admin-toast show ${type}`;
+            setTimeout(() => t.classList.remove('show'), 3000);
         }
 
         function toggleServerHelp() {
-            // Only show popover when offline
-            if (_srvOnline) return;
-            const pop = document.getElementById('srv-popover');
-            _srvPopoverOpen = !_srvPopoverOpen;
-            pop.style.display = _srvPopoverOpen ? 'block' : 'none';
-        }
-
-        // Close popover if clicking outside
-        document.addEventListener('click', (e) => {
-            const pill = document.getElementById('server-status-pill');
-            if (pill && !pill.contains(e.target)) {
-                document.getElementById('srv-popover').style.display = 'none';
-                _srvPopoverOpen = false;
-            }
-        });
-
-        function startServerMonitor() {
-            checkServer();
-            setInterval(checkServer, 5000);
-        }
-
-
-        // ── NAV ──
-        function showPage(name, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('page-' + name).classList.add('active');
-            el.classList.add('active');
-            if (name === 'submissions') loadSubmissions('all', document.querySelector('.filter-pill'));
-        }
-
-        // ── INIT ──
-        function initDashboard() {
-            buildVideoSlots();
-            loadOverview();
-            startServerMonitor();
+            const p = document.getElementById('srv-popover');
+            p.style.display = p.style.display === 'none' ? 'block' : 'none';
         }
 
         // ── VIDEO MANAGER ──

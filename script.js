@@ -539,7 +539,7 @@ function showToast(message, type = 'success') {
 }
 
 // ─────────────────────────────────────────────────────────
-// CONTACT FORM — Formspree async submit
+// CONTACT FORM — saves to database only
 // ─────────────────────────────────────────────────────────
 function setupContactForm() {
     const form = document.getElementById('contact-form');
@@ -547,116 +547,67 @@ function setupContactForm() {
     const statusDiv = document.getElementById('form-status');
     if (!form) return;
 
-    // Pre-fill hidden tracking fields
-    const tsField = document.getElementById('submitted_at');
-    const devField = document.getElementById('visitor_device');
-    if (tsField) tsField.value = new Date().toISOString();
-    if (devField) devField.value = `${navigator.userAgent.slice(0, 80)} | ${window.innerWidth}x${window.innerHeight}`;
-
-    // Mirror email into _replyto so Formspree auto-replies to visitor
-    const emailInput = form.querySelector('[name="email"]');
-    const replyToField = document.getElementById('_replyto');
-    const subjectField = document.getElementById('_subject');
-    const nameInput = form.querySelector('[name="name"]');
-    if (emailInput && replyToField) {
-        emailInput.addEventListener('input', () => { replyToField.value = emailInput.value; });
-    }
+    // Determine Server URL (Local vs Render)
+    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.startsWith('192.168.');
+    const SERVER_URL = isLocal ? `http://${location.hostname}:3001` : 'https://shraddhavideology.onrender.com';
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // Basic validation
+        const nameInput = form.querySelector('[name="name"]');
+        const emailInput = form.querySelector('[name="email"]');
+        const phone = (form.querySelector('[name="phone"]') || {}).value || '';
+        const project = (form.querySelector('[name="project"]') || {}).value || '';
+        const message = (form.querySelector('[name="message"]') || {}).value || '';
+
         const name = nameInput ? nameInput.value.trim() : '';
         const email = emailInput ? emailInput.value.trim() : '';
-        const project = (form.querySelector('[name="project"]') || {}).value || '';
+
         if (!name || !email) {
-            showToast('Please fill in your name and email.', 'error');
+            if (statusDiv) {
+                statusDiv.textContent = 'Please fill in required fields';
+                statusDiv.className = 'form-status visible error';
+            }
             return;
         }
 
-        // Update hidden fields with latest values
-        if (tsField) tsField.value = new Date().toISOString();
-        if (replyToField) replyToField.value = email;
-        if (subjectField) subjectField.value = `🎬 New Inquiry: ${project} from ${name}`;
+        const originalText = submitBtn ? submitBtn.innerHTML : 'Send Message';
+        if (submitBtn) {
+            submitBtn.innerHTML = 'Sending...';
+            submitBtn.disabled = true;
+        }
 
-        // Loading state
-        if (submitBtn) { submitBtn.textContent = 'Sending...'; submitBtn.classList.add('loading'); }
-
-        const phone = (form.querySelector('[name="phone"]') || {}).value || '';
-        const message = (form.querySelector('[name="message"]') || {}).value || '';
-
-        // ── 1. Send to Render server: DB save + admin email + auto-reply to visitor ──
-        const RENDER_SERVER = 'https://shraddhavideology.onrender.com';
-        let serverSaved = false;
         try {
-            const srvRes = await fetch(`${RENDER_SERVER}/api/contact`, {
+            const res = await fetch(`${SERVER_URL}/api/contact`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, phone, project, message }),
-                signal: AbortSignal.timeout(8000)
+                signal: AbortSignal.timeout(10000)
             });
-            if (srvRes.ok) serverSaved = true;
-        } catch (_) { /* server offline — fallback below */ }
 
-        // ── 2. Web3Forms: admin backup notification ──
-        const WEB3_KEY = '03515a5e-8b0a-4244-af94-60de8fbbb772';
-
-        let submitted = false;
-        try {
-            const payload = {
-                access_key: WEB3_KEY,
-                name, email, phone,
-                subject: `🎬 New Inquiry: ${project || 'General'} from ${name}`,
-                message: `Name: ${name}\nEmail: ${email}\nPhone: ${phone || 'Not provided'}\nProject: ${project || 'Not specified'}\n\nMessage:\n${message}`,
-                replyto: email,
-                from_name: 'Shraddha Videology',
-            };
-
-            const res = await fetch('https://api.web3forms.com/submit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (data.success) submitted = true;
-        } catch (_) { /* network error — will use mailto fallback */ }
-
-
-        if (submitted) {
-            form.reset();
+            if (res.ok) {
+                if (statusDiv) {
+                    statusDiv.textContent = '✓ Message received! We\'ll get back to you soon.';
+                    statusDiv.className = 'form-status visible success';
+                }
+                showToast(`Thanks ${name}! Your message has been saved. 🎬`, 'success');
+                form.reset();
+            } else {
+                throw new Error('Server error');
+            }
+        } catch (err) {
+            console.error('Submission failed:', err);
             if (statusDiv) {
-                statusDiv.textContent = '✓ Message sent! You\'ll also receive a confirmation email.';
-                statusDiv.className = 'form-status visible success';
+                statusDiv.textContent = '⚠ Could not reach server. Please try again later.';
+                statusDiv.className = 'form-status visible error';
             }
-            showToast(`Thanks ${name}! Message sent — check your inbox for our confirmation! 🎬`, 'success');
-            if (typeof gtag === 'function') {
-                gtag('event', 'form_submit', { event_category: 'Contact', event_label: project });
+            showToast('Could not save message — please try again later.', 'error');
+        } finally {
+            if (submitBtn) {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             }
-        } else {
-            // ── Fallback: open Gmail with all details pre-filled ──
-            const body = [
-                `Name: ${name}`,
-                `Email: ${email}`,
-                phone ? `Phone: ${phone}` : '',
-                project ? `Project: ${project}` : '',
-                '',
-                message
-            ].filter(Boolean).join('\n');
-
-            const mailto = `mailto:shraddhavideology@gmail.com`
-                + `?subject=${encodeURIComponent(`New Inquiry: ${project || 'General'} from ${name}`)}`
-                + `&body=${encodeURIComponent(body)}`;
-
-            window.open(mailto, '_blank');
-            form.reset();
-            if (statusDiv) {
-                statusDiv.textContent = '✉ Your email app opened — please hit Send there.';
-                statusDiv.className = 'form-status visible success';
-            }
-            showToast('Email app opened — please hit Send to complete!', 'success');
         }
-
-
     });
 }
 

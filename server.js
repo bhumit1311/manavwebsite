@@ -10,158 +10,13 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
-const nodemailer = require('nodemailer');
-
-// ═══════════════════════════════════════════════════════
-//  ✉️  EMAIL CONFIG — EDIT THESE TWO LINES
-//  1. Use your Gmail address for GMAIL_USER
-//  2. For GMAIL_PASS: use a Gmail "App Password"
-//     (NOT your regular Gmail password)
-//     How to get one → https://myaccount.google.com/apppasswords
-//     Steps: Google Account → Security → 2FA ON → App Passwords → Create
-// ═══════════════════════════════════════════════════════
-const GMAIL_USER = process.env.GMAIL_USER || 'shraddhavideology@gmail.com';
-const GMAIL_PASS = process.env.GMAIL_PASS || '';   // Set this in Render environment variables
-const NOTIFY_TO = process.env.NOTIFY_TO || 'shraddhavideology@gmail.com';
-
-// ── Setup email transporter ───────────────────────────
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: { user: GMAIL_USER, pass: GMAIL_PASS }
-});
-
-function emailReady() {
-  return GMAIL_PASS !== 'YOUR_APP_PASSWORD_HERE' && GMAIL_PASS.length > 8;
-}
-
-async function sendNewInquiryEmail(data) {
-  if (!emailReady()) {
-    console.log('⚠️  Admin email skipped — configure GMAIL_PASS in Render environment variables');
-    return;
-  }
-  const { name, email, phone, project, message } = data;
-  const html = `
-        <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#0a0a0f;color:#f0f0f0;border-radius:12px;overflow:hidden">
-            <div style="background:#e8b86d;padding:24px 28px">
-                <h2 style="margin:0;color:#0a0a0f;font-size:1.2rem">🎥 New Inquiry — Shraddha Videology</h2>
-            </div>
-            <div style="padding:28px">
-                <table style="width:100%;border-collapse:collapse">
-                    <tr><td style="padding:8px 0;color:#aaa;width:100px">Name</td><td style="padding:8px 0;font-weight:bold">${name}</td></tr>
-                    <tr><td style="padding:8px 0;color:#aaa">Email</td><td style="padding:8px 0"><a href="mailto:${email}" style="color:#e8b86d">${email}</a></td></tr>
-                    <tr><td style="padding:8px 0;color:#aaa">Phone</td><td style="padding:8px 0">${phone || '—'}</td></tr>
-                    <tr><td style="padding:8px 0;color:#aaa">Project</td><td style="padding:8px 0">${project || '—'}</td></tr>
-                </table>
-                <div style="margin-top:20px;background:#111;border-left:3px solid #e8b86d;padding:14px 16px;border-radius:4px">
-                    <div style="color:#aaa;font-size:0.8rem;margin-bottom:6px">MESSAGE</div>
-                    <div style="line-height:1.6">${message || '(no message)'}</div>
-                </div>
-                <div style="margin-top:24px;display:flex;gap:12px">
-                    ${email ? `<a href="mailto:${email}?subject=Re: Your Inquiry — Shraddha Videology&body=Hi ${name},%0A%0AThank you for reaching out!" style="background:#e8b86d;color:#000;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:0.88rem">📧 Reply via Email</a>` : ''}
-                    ${phone ? `<a href="https://wa.me/91${(phone).replace(/\D/g, '')}" style="background:#25d366;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:0.88rem">💬 WhatsApp</a>` : ''}
-                </div>
-                <p style="margin-top:24px;color:#555;font-size:0.75rem">Sent by Shraddha Videology Portfolio</p>
-            </div>
-        </div>
-    `;
-  await transporter.sendMail({
-    from: `"Shraddha Videology Portfolio" <${GMAIL_USER}>`,
-    to: NOTIFY_TO,
-    subject: `📬 New Inquiry: ${project || 'General'} from ${name}`,
-    html
-  });
-  console.log(`✉️  Admin notification sent to ${NOTIFY_TO}`);
-}
-
-async function sendAutoReplyEmail(data) {
-  if (!emailReady()) return;
-  const { name, email, project } = data;
-  const html = `
-  <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:580px;margin:0 auto;background:#0d0d14;border-radius:18px;overflow:hidden;color:#f0f0f0">
-
-    <!-- Header -->
-    <div style="background:linear-gradient(135deg,#e8b86d 0%,#c9922a 100%);padding:38px 32px;text-align:center">
-      <div style="font-size:2.4rem;margin-bottom:10px">�</div>
-      <h1 style="margin:0;color:#0d0d14;font-size:1.5rem;font-weight:800;letter-spacing:1px">SHRADDHA VIDEOLOGY</h1>
-      <p style="margin:6px 0 0;color:#0d0d14;font-size:0.9rem;opacity:0.75">Professional Video Editor &amp; Visual Storyteller</p>
-    </div>
-
-    <!-- Body -->
-    <div style="padding:36px 32px">
-
-      <p style="font-size:1.15rem;margin:0 0 6px;font-weight:600">Dear ${name},</p>
-      <p style="font-size:1.05rem;margin:0 0 22px;color:#e8b86d;font-weight:500">Thank you so much for reaching out! �</p>
-
-      <p style="line-height:1.85;color:#ccc;margin:0 0 20px">
-        We're truly delighted that you chose <strong style="color:#fff">Shraddha Videology</strong> for your project.
-        Your inquiry${project ? ` regarding <strong style="color:#e8b86d">${project}</strong>` : ''} has been
-        received successfully, and we're already excited about the possibility of bringing your vision to life!
-      </p>
-
-      <!-- 24hr Promise Box -->
-      <div style="background:#12121f;border:1px solid #e8b86d33;border-left:4px solid #e8b86d;border-radius:10px;padding:20px 22px;margin:28px 0">
-        <p style="margin:0 0 8px;color:#e8b86d;font-weight:700;font-size:1rem">⏰ What happens next?</p>
-        <p style="margin:0;color:#ccc;line-height:1.8;font-size:0.92rem">
-          I will personally review your message and reach out to you within
-          <strong style="color:#ffffff;font-size:1rem"> 24 hours</strong>.
-          Together, we'll discuss your creative requirements and craft something truly special. 🎥✨
-        </p>
-      </div>
-
-      <p style="line-height:1.8;color:#aaa;font-size:0.9rem;margin:0 0 24px">
-        If you have any urgent queries in the meantime, feel free to contact us directly —
-        we're always happy to help!
-      </p>
-
-      <!-- Buttons -->
-      <table cellpadding="0" cellspacing="0" style="margin-bottom:28px">
-        <tr>
-          <td style="padding-right:12px">
-            <a href="mailto:shraddhavideology@gmail.com"
-               style="display:inline-block;background:transparent;color:#e8b86d;border:1.5px solid #e8b86d;padding:11px 20px;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:600">
-              📧 Email Us
-            </a>
-          </td>
-          <td>
-            <a href="https://wa.me/917874712871"
-               style="display:inline-block;background:#25d366;color:#fff;padding:11px 20px;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:600">
-              💬 WhatsApp
-            </a>
-          </td>
-        </tr>
-      </table>
-
-      <!-- Sign-off -->
-      <p style="line-height:1.9;color:#ddd;margin:0;border-top:1px solid #1e1e2e;padding-top:22px">
-        With warm regards,<br/>
-        <strong style="font-size:1.15rem;color:#e8b86d">Shraddha</strong><br/>
-        <span style="color:#888;font-size:0.85rem">Shraddha Videology &amp; Production</span><br/>
-        <span style="color:#555;font-size:0.8rem">shraddhavideology@gmail.com &nbsp;|&nbsp; +91 78747 12871</span>
-      </p>
-
-    </div>
-
-    <!-- Footer -->
-    <div style="background:#080810;padding:16px 32px;text-align:center">
-      <p style="margin:0;color:#333;font-size:0.75rem">© 2025 Shraddha Videology. All rights reserved.</p>
-    </div>
-
-  </div>
-  `;
-  await transporter.sendMail({
-    from: `"Shraddha Videology" <${GMAIL_USER}>`,
-    to: email,
-    replyTo: GMAIL_USER,
-    subject: `� Thank You, ${name}! We'll be in touch within 24 hours — Shraddha Videology`,
-    html
-  });
-  console.log(`✉️  Auto-reply sent to ${email}`);
-}
+const bcrypt = require('bcryptjs');
 
 // ════════════════════════════════════════════════════════
 const app = express();
 const PORT = process.env.PORT || 3001;
 const DB_PATH = path.join(__dirname, 'database.db');
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'secure-session-token-2024'; // In prod, use env var
 
 // ── Open / create database file ───────────────────────
 const db = new sqlite3.Database(DB_PATH, (err) => {
@@ -198,21 +53,44 @@ async function initDB() {
         drive_id TEXT,
         display_label TEXT
     )`);
-  // Migrate old schema if needed
-  try { await run(`ALTER TABLE video_config ADD COLUMN drive_id TEXT`); } catch { }
-  try { await run(`ALTER TABLE video_config ADD COLUMN display_label TEXT`); } catch { }
+
   await run(`CREATE TABLE IF NOT EXISTS admin_credentials (
         id INTEGER PRIMARY KEY CHECK (id = 1),
         username TEXT NOT NULL DEFAULT 'manav2109',
-        password TEXT NOT NULL DEFAULT 'manav@2109'
+        password TEXT NOT NULL
     )`);
-  await run(`INSERT OR IGNORE INTO admin_credentials (id, username, password) VALUES (1, 'manav2109', 'manav@2109')`);
+
+  // Check if admin exists, if not create with hashed password
+  const admin = await get('SELECT * FROM admin_credentials WHERE id = 1');
+  if (!admin) {
+    const hashedPass = await bcrypt.hash('manav@2109', 10);
+    await run('INSERT INTO admin_credentials (id, username, password) VALUES (1, ?, ?)', ['manav2109', hashedPass]);
+    console.log('👤 Admin credentials initialized.');
+  }
 }
 
 // ── Middleware ────────────────────────────────────────
-app.use(cors({ origin: '*' }));
+app.use(cors({ origin: '*' })); // For production, restrict this to your domain
 app.use(express.json());
 app.use(express.static(__dirname));
+
+// Security Headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
+
+// Auth Middleware
+const authenticate = (req, res, next) => {
+  const token = req.headers['authorization'];
+  if (token === `Bearer ${ADMIN_TOKEN}`) {
+    next();
+  } else {
+    res.status(401).json({ ok: false, error: 'Unauthorized access' });
+  }
+};
 
 // ─────────────────────────────────────────────────────
 // AUTH
@@ -222,19 +100,22 @@ app.post('/api/login', async (req, res) => {
   try {
     const { username, password } = req.body;
     const creds = await get('SELECT * FROM admin_credentials WHERE id = 1');
-    if (username === creds.username && password === creds.password) {
-      res.json({ ok: true, username });
+
+    const match = await bcrypt.compare(password, creds.password);
+    if (username === creds.username && match) {
+      res.json({ ok: true, username, token: ADMIN_TOKEN });
     } else {
       res.status(401).json({ ok: false, error: 'Incorrect username or password' });
     }
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/credentials', async (req, res) => {
+app.post('/api/credentials', authenticate, async (req, res) => {
   try {
     const { username, password } = req.body;
     if (!username || !password) return res.status(400).json({ error: 'Missing fields' });
-    await run('UPDATE admin_credentials SET username = ?, password = ? WHERE id = 1', [username, password]);
+    const hashedPass = await bcrypt.hash(password, 10);
+    await run('UPDATE admin_credentials SET username = ?, password = ? WHERE id = 1', [username, hashedPass]);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -248,33 +129,25 @@ app.post('/api/contact', async (req, res) => {
     const { name, email, phone, project, message } = req.body;
     if (!name || !email) return res.status(400).json({ error: 'Name and email required' });
 
-    // 1. Save to database
+    // Save to database
     const result = await run(
       'INSERT INTO submissions (name, email, phone, project, message) VALUES (?, ?, ?, ?, ?)',
       [name, email, phone || '', project || '', message || '']
     );
     console.log(`📬 New submission #${result.lastID}: ${name} <${email}>`);
 
-    // 2. Send admin notification email (non-blocking)
-    sendNewInquiryEmail({ name, email, phone, project, message })
-      .catch(err => console.error('⚠️  Admin email error:', err.message));
-
-    // 3. Send auto-reply to visitor (non-blocking)
-    sendAutoReplyEmail({ name, email, project })
-      .catch(err => console.error('⚠️  Auto-reply error:', err.message));
-
     res.json({ ok: true, id: result.lastID });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/submissions', async (req, res) => {
+app.get('/api/submissions', authenticate, async (req, res) => {
   try {
     const rows = await all('SELECT * FROM submissions ORDER BY created_at DESC');
     res.json(rows);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/submissions/export', async (req, res) => {
+app.get('/api/submissions/export', authenticate, async (req, res) => {
   try {
     const rows = await all('SELECT * FROM submissions ORDER BY created_at DESC');
     res.setHeader('Content-Disposition', 'attachment; filename="submissions.json"');
@@ -282,21 +155,21 @@ app.get('/api/submissions/export', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.patch('/api/submissions/:id/read', async (req, res) => {
+app.patch('/api/submissions/:id/read', authenticate, async (req, res) => {
   try {
     await run('UPDATE submissions SET is_read = 1 WHERE id = ?', [req.params.id]);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/submissions/:id', async (req, res) => {
+app.delete('/api/submissions/:id', authenticate, async (req, res) => {
   try {
     await run('DELETE FROM submissions WHERE id = ?', [req.params.id]);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/submissions', async (req, res) => {
+app.delete('/api/submissions', authenticate, async (req, res) => {
   try {
     await run('DELETE FROM submissions');
     res.json({ ok: true });
@@ -318,7 +191,7 @@ app.get('/api/videos', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/videos', async (req, res) => {
+app.post('/api/videos', authenticate, async (req, res) => {
   try {
     const { slot_id, drive_id, display_label } = req.body;
     if (!slot_id || !drive_id) return res.status(400).json({ error: 'Missing fields' });
@@ -335,16 +208,16 @@ app.post('/api/videos', async (req, res) => {
 // START SERVER
 // ─────────────────────────────────────────────────────
 initDB().then(() => {
-  app.listen(PORT, () => {
-    const emailStatus = emailReady() ? '✅ Email ON' : '⚠️  Email OFF (set GMAIL_PASS)';
+  app.listen(PORT, '0.0.0.0', () => {
     console.log('');
     console.log('╔════════════════════════════════════════════╗');
     console.log('║  ✅  Server is running!                    ║');
     console.log('║                                            ║');
-    console.log(`║  Portfolio : http://localhost:${PORT}         ║`);
+    console.log(`║  Local     : http://localhost:${PORT}         ║`);
+    console.log(`║  Network   : Please check your IP address   ║`);
     console.log(`║  Admin     : http://localhost:${PORT}/admin.html ║`);
     console.log('║                                            ║');
-    console.log(`║  ${emailStatus.padEnd(42)}║`);
+    console.log('║  🔒 Security: API Protection Active        ║');
     console.log('║  Press CTRL+C to stop                      ║');
     console.log('╚════════════════════════════════════════════╝');
     console.log('');
