@@ -24,7 +24,7 @@ const logger = {
 const app = express();
 const PORT = process.env.PORT || 3001;
 const DB_PATH = path.join(__dirname, 'database.db');
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'secure-session-token-2024'; // In prod, use env var
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'sv-admin-2024-manav';
 
 // ── Global Process Protection ─────────────────────────
 process.on('uncaughtException', (err) => {

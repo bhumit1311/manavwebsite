@@ -1004,11 +1004,7 @@
             if (token) headers['Authorization'] = `Bearer ${token}`;
 
             const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-            if (res.status === 401) {
-                doLogout();
-                throw new Error('Session expired');
-            }
-            return res;
+            return res; // Return response for caller to handle status codes
         }
 
         // ── INITIALIZE ──
@@ -1064,13 +1060,17 @@
             if (container) container.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted)">Loading submissions...</div>';
             try {
                 const res = await apiFetch('/submissions');
+                if (res.status === 401) {
+                    if (container) container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔒</div>Session expired.<br><small style="color:var(--muted)">Please <a href="#" onclick="doLogout()" style="color:var(--accent)">logout and login again</a>.</small></div>';
+                    return;
+                }
                 if (!res.ok) throw new Error('Server error: ' + res.status);
                 currentSubmissions = await res.json();
                 renderSubmissions();
                 updateStats();
             } catch (e) {
                 console.error('Failed to load submissions:', e);
-                if (container) container.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div>Could not load submissions.<br><small style="color:var(--muted)">Server may be waking up — please wait 30s and refresh.</small></div>';
+                if (container) container.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div>Could not load submissions.<br><small style="color:var(--muted)">Server may be waking up. <a href="#" onclick="loadSubmissions()" style="color:var(--accent)">Click to retry</a>.</small></div>';
             }
         }
 

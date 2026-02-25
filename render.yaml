@@ -8,6 +8,6 @@ services:
     plan: free
     envVars:
       - key: ADMIN_TOKEN
-        sync: false        # Set a secure random string in Render dashboard
+        value: sv-admin-2024-manav
       - key: NODE_ENV
         value: production
