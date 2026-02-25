@@ -572,7 +572,7 @@ function setupContactForm() {
     // Determine Server URL (Local vs Render)
     const isIP = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(location.hostname);
     const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || isIP;
-    const SERVER_URL = isLocal ? `http://${location.hostname}:3001` : 'https://shraddhavideology.onrender.com';
+    const SERVER_URL = isLocal ? `http://${location.hostname}:3001` : 'https://manavwebsite.onrender.com';
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
