@@ -373,9 +373,10 @@
 
                 <!-- ── Main Player ── -->
                 <div class="showreel-main-wrap reveal-up">
-                    <video id="main-reel-video" controls autoplay muted loop playsinline>
-                        <source src="videos/final reel.mp4" type="video/mp4" />
-                    </video>
+                    <iframe id="main-reel-iframe"
+                        src="https://drive.google.com/file/d/1mNZxiQrEtQaVgLbBra-7_jDwv4QdP8rf/preview" allow="autoplay"
+                        style="width:100%;height:100%;border:none;border-radius:12px;display:block" allowfullscreen>
+                    </iframe>
                 </div>
 
                 <!-- ── Title bar ── -->
@@ -388,97 +389,111 @@
                 <div class="reel-thumbs-track reveal-up" style="margin-top:24px" id="reel-thumbs">
 
                     <div class="reel-thumb active"
-                        onclick="playReel(this,'videos/final reel.mp4','🎬 Final Reel — Studio Showcase',1)">
+                        onclick="playReel(this,'1mNZxiQrEtQaVgLbBra-7_jDwv4QdP8rf','🎬 Final Reel — Studio Showcase',1)">
                         <div class="reel-thumb-video-wrap">
-                            <video src="videos/final reel.mp4" muted preload="metadata"></video>
+                            <img src="https://drive.google.com/thumbnail?id=1mNZxiQrEtQaVgLbBra-7_jDwv4QdP8rf&sz=w400"
+                                loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:8px" />
                             <div class="reel-thumb-play">▶</div>
                         </div>
                         <div class="reel-thumb-label">Final Reel</div>
                     </div>
 
                     <div class="reel-thumb"
-                        onclick="playReel(this,'videos/FORTUNE AIR DIWALI REEL-1.mp4','🪔 Fortune Air Diwali Reel',2)">
+                        onclick="playReel(this,'19aApncxKmJWu9k17OfMq3gJWkmTsZklk','🪔 Fortune Air Diwali Reel',2)">
                         <div class="reel-thumb-video-wrap">
-                            <video src="videos/FORTUNE AIR DIWALI REEL-1.mp4" muted preload="metadata"></video>
+                            <img src="https://drive.google.com/thumbnail?id=19aApncxKmJWu9k17OfMq3gJWkmTsZklk&sz=w400"
+                                loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:8px" />
                             <div class="reel-thumb-play">▶</div>
                         </div>
                         <div class="reel-thumb-label">Fortune Air</div>
                     </div>
 
                     <div class="reel-thumb"
-                        onclick="playReel(this,'videos/HIREN &amp; KRISHNA TEASER.mp4','💍 Hiren &amp; Krishna Teaser',3)">
+                        onclick="playReel(this,'1AAMiyFRUKuWvbDXsQ2ASkR0RjDY6lcnV','💍 Hiren &amp; Krishna Teaser',3)">
                         <div class="reel-thumb-video-wrap">
-                            <video src="videos/HIREN &amp; KRISHNA TEASER.mp4" muted preload="metadata"></video>
+                            <img src="https://drive.google.com/thumbnail?id=1AAMiyFRUKuWvbDXsQ2ASkR0RjDY6lcnV&sz=w400"
+                                loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:8px" />
                             <div class="reel-thumb-play">▶</div>
                         </div>
                         <div class="reel-thumb-label">Hiren &amp; Krishna</div>
                     </div>
 
                     <div class="reel-thumb"
-                        onclick="playReel(this,'videos/Jayneel Riya reel.mp4','💒 Jayneel Riya Reel',4)">
+                        onclick="playReel(this,'15htJKfeIgUdah-TIWY4hTf_J_UnjGfpJ','💒 Jayneel Riya Reel',4)">
                         <div class="reel-thumb-video-wrap">
-                            <video src="videos/Jayneel Riya reel.mp4" muted preload="metadata"></video>
+                            <img src="https://drive.google.com/thumbnail?id=15htJKfeIgUdah-TIWY4hTf_J_UnjGfpJ&sz=w400"
+                                loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:8px" />
                             <div class="reel-thumb-play">▶</div>
                         </div>
                         <div class="reel-thumb-label">Jayneel Riya</div>
                     </div>
 
                     <div class="reel-thumb"
-                        onclick="playReel(this,'videos/NAZARBAUG DIWALI REEL_1.mp4','🪔 Nazarbaug Diwali Reel',5)">
+                        onclick="playReel(this,'1Cv51cMYD_dkcGAJnldKMDlb99buhNXjz','🪔 Nazarbaug Diwali Reel',5)">
                         <div class="reel-thumb-video-wrap">
-                            <video src="videos/NAZARBAUG DIWALI REEL_1.mp4" muted preload="metadata"></video>
+                            <img src="https://drive.google.com/thumbnail?id=1Cv51cMYD_dkcGAJnldKMDlb99buhNXjz&sz=w400"
+                                loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:8px" />
                             <div class="reel-thumb-play">▶</div>
                         </div>
                         <div class="reel-thumb-label">Nazarbaug</div>
                     </div>
 
                     <div class="reel-thumb"
-                        onclick="playReel(this,'videos/Neimish_20260122_002210_0000.mp4','📱 Neimish Creative Reel',6)">
+                        onclick="playReel(this,'1E2oSq-6N9FZ5lFnVEHArXERmR5Xa4ilu','📱 Neimish Creative Reel',6)">
                         <div class="reel-thumb-video-wrap">
-                            <video src="videos/Neimish_20260122_002210_0000.mp4" muted preload="metadata"></video>
+                            <img src="https://drive.google.com/thumbnail?id=1E2oSq-6N9FZ5lFnVEHArXERmR5Xa4ilu&sz=w400"
+                                loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:8px" />
                             <div class="reel-thumb-play">▶</div>
                         </div>
                         <div class="reel-thumb-label">Neimish</div>
                     </div>
 
                     <div class="reel-thumb"
-                        onclick="playReel(this,'videos/SHREENAND NEW REEL01  1.mp4','🎥 Shreenand New Reel',7)">
+                        onclick="playReel(this,'1iN4Y4HUstrZSEgx3E1sXFT8CE31CIxii','🎥 Shreenand New Reel',7)">
                         <div class="reel-thumb-video-wrap">
-                            <video src="videos/SHREENAND NEW REEL01  1.mp4" muted preload="metadata"></video>
+                            <img src="https://drive.google.com/thumbnail?id=1iN4Y4HUstrZSEgx3E1sXFT8CE31CIxii&sz=w400"
+                                loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:8px" />
                             <div class="reel-thumb-play">▶</div>
                         </div>
                         <div class="reel-thumb-label">Shreenand</div>
                     </div>
 
-                    <div class="reel-thumb" onclick="playReel(this,'videos/Sequence 01.mp4','🏢 Sequence Edit',8)">
+                    <div class="reel-thumb"
+                        onclick="playReel(this,'150Wuos1yDQy6GqijErZOovu3EFl4Y3tS','🏢 Sequence Edit',8)">
                         <div class="reel-thumb-video-wrap">
-                            <video src="videos/Sequence 01.mp4" muted preload="metadata"></video>
+                            <img src="https://drive.google.com/thumbnail?id=150Wuos1yDQy6GqijErZOovu3EFl4Y3tS&sz=w400"
+                                loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:8px" />
                             <div class="reel-thumb-play">▶</div>
                         </div>
                         <div class="reel-thumb-label">Sequence Edit</div>
                     </div>
 
                     <div class="reel-thumb"
-                        onclick="playReel(this,'videos/engagement reel.mp4','💑 Engagement Reel',9)">
+                        onclick="playReel(this,'10Y9p3VupK7OYf-aajIGyXXnBS1BOLUoW','💑 Engagement Reel',9)">
                         <div class="reel-thumb-video-wrap">
-                            <video src="videos/engagement reel.mp4" muted preload="metadata"></video>
+                            <img src="https://drive.google.com/thumbnail?id=10Y9p3VupK7OYf-aajIGyXXnBS1BOLUoW&sz=w400"
+                                loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:8px" />
                             <div class="reel-thumb-play">▶</div>
                         </div>
                         <div class="reel-thumb-label">Engagement</div>
                     </div>
 
                     <div class="reel-thumb"
-                        onclick="playReel(this,'videos/pure dental opening reel.mp4','🦷 Pure Dental Opening',10)">
+                        onclick="playReel(this,'1MN39UX73rPlhKgGNx1hk1JQq6TUs-7QY','🦷 Pure Dental Opening',10)">
                         <div class="reel-thumb-video-wrap">
-                            <video src="videos/pure dental opening reel.mp4" muted preload="metadata"></video>
+                            <img src="https://drive.google.com/thumbnail?id=1MN39UX73rPlhKgGNx1hk1JQq6TUs-7QY&sz=w400"
+                                loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:8px" />
                             <div class="reel-thumb-play">▶</div>
                         </div>
                         <div class="reel-thumb-label">Pure Dental</div>
                     </div>
 
                 </div>
-            </div>
         </section>
+
+
+
+
 
 
 
@@ -559,7 +574,7 @@
                     <div class="stat-num" data-count="2" data-suffix="+">0+</div>
                     <div class="stat-label">Years Experience</div>
                 </div>
-              
+
             </div>
         </section>
 

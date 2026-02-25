@@ -581,24 +581,42 @@ function setupContactForm() {
         const phone = (form.querySelector('[name="phone"]') || {}).value || '';
         const message = (form.querySelector('[name="message"]') || {}).value || '';
 
-        let serverOnline = false;
-        try {
-            const res = await fetch('http://localhost:3001/api/contact', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, phone, project, message })
-            });
-            if (res.ok) serverOnline = true;
-        } catch (_) { /* server offline — will use mailto fallback */ }
+        // ── Web3Forms submission (works without any server, free forever) ──
+        const WEB3_KEY = '03515a5e-8b0a-4244-af94-60de8fbbb772';
 
-        if (serverOnline) {
-            // ── Server saved it + email notification sent ──
+        let submitted = false;
+        try {
+            const payload = {
+                access_key: WEB3_KEY,
+                name,
+                email,
+                phone,
+                subject: `🎬 New Inquiry: ${project || 'General'} from ${name}`,
+                message: `Name: ${name}\nEmail: ${email}\nPhone: ${phone || 'Not provided'}\nProject: ${project || 'Not specified'}\n\nMessage:\n${message}`,
+                // Auto-reply greeting sent to the visitor
+                replyto: email,
+                from_name: 'Shraddha Videology',
+                // Web3Forms auto-reply config
+                autoresponse: true,
+                autoresponse_message: `Hi ${name}! 👋\n\nThank you for reaching out to Shraddha Videology!\n\nWe've received your inquiry about "${project || 'your project'}" and will get back to you within 24 hours.\n\nHere's a copy of your message:\n"${message}"\n\nLooking forward to creating something amazing together! 🎬\n\nWarm regards,\nShraddha Videology Team\nshraddhavideology@gmail.com`,
+            };
+
+            const res = await fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) submitted = true;
+        } catch (_) { /* network error — will use mailto fallback */ }
+
+        if (submitted) {
             form.reset();
             if (statusDiv) {
-                statusDiv.textContent = '✓ Message sent! I\'ll reply within 24 hours.';
+                statusDiv.textContent = '✓ Message sent! You\'ll also receive a confirmation email.';
                 statusDiv.className = 'form-status visible success';
             }
-            showToast(`Thanks ${name}! Your message has been received.`, 'success');
+            showToast(`Thanks ${name}! Message sent — check your inbox for our confirmation! 🎬`, 'success');
             if (typeof gtag === 'function') {
                 gtag('event', 'form_submit', { event_category: 'Contact', event_label: project });
             }
@@ -626,23 +644,20 @@ function setupContactForm() {
             showToast('Email app opened — please hit Send to complete!', 'success');
         }
 
-        if (submitBtn) { submitBtn.textContent = 'Send Message ✉'; submitBtn.classList.remove('loading'); }
+
     });
 }
 
 // ─────────────────────────────────────────────────────────
 // SHOWREEL MULTI-VIDEO SWITCHER
 // ─────────────────────────────────────────────────────────
-function playReel(thumb, src, label, num) {
-    // Update main video
-    const mainVideo = document.getElementById('main-reel-video');
+function playReel(thumb, driveId, label, num) {
+    // Update main player — swap iframe src to Drive preview URL
+    const iframe = document.getElementById('main-reel-iframe');
     const mainTitle = document.getElementById('main-reel-title');
     const counter = document.getElementById('reel-counter');
-    if (mainVideo) {
-        mainVideo.pause();
-        mainVideo.src = src;
-        mainVideo.load();
-        mainVideo.play().catch(() => { });
+    if (iframe) {
+        iframe.src = `https://drive.google.com/file/d/${driveId}/preview`;
     }
     if (mainTitle) mainTitle.textContent = label;
     if (counter && num) counter.textContent = num + ' / 10';
@@ -654,6 +669,7 @@ function playReel(thumb, src, label, num) {
     // Scroll thumb into view inside its track
     thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 }
+
 
 // ─────────────────────────────────────────────────────────
 // SMOOTH SCROLL for anchor links
