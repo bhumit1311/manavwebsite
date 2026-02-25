@@ -12,16 +12,34 @@ const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 
+// ── Standardized Logging ─────────────────────────────
+const logger = {
+  info: (msg) => console.log(`[${new Date().toLocaleTimeString()}] ℹ️ INFO: ${msg}`),
+  success: (msg) => console.log(`[${new Date().toLocaleTimeString()}] ✅ SUCCESS: ${msg}`),
+  warn: (msg) => console.warn(`[${new Date().toLocaleTimeString()}] ⚠️ WARN: ${msg}`),
+  error: (msg) => console.error(`[${new Date().toLocaleTimeString()}] 🔥 ERROR: ${msg}`)
+};
+
 // ════════════════════════════════════════════════════════
 const app = express();
 const PORT = process.env.PORT || 3001;
 const DB_PATH = path.join(__dirname, 'database.db');
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'secure-session-token-2024'; // In prod, use env var
 
+// ── Global Process Protection ─────────────────────────
+process.on('uncaughtException', (err) => {
+  console.error('🔥 CRITICAL UNCAUGHT EXCEPTION:', err);
+  // In a real prod app, you might want to gracefully shutdown, 
+  // but for small sites, we log and try to stay alive if possible.
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('⚠️ UNHANDLED PROMISE REJECTION:', reason);
+});
+
 // ── Open / create database file ───────────────────────
 const db = new sqlite3.Database(DB_PATH, (err) => {
-  if (err) { console.error('❌ Database error:', err.message); process.exit(1); }
-  console.log('📂 Database: ' + DB_PATH);
+  if (err) { logger.error('Database error: ' + err.message); process.exit(1); }
+  logger.info('Database mapped: ' + DB_PATH);
 });
 
 function run(sql, params = []) {
@@ -65,7 +83,7 @@ async function initDB() {
   if (!admin) {
     const hashedPass = await bcrypt.hash('manav@2109', 10);
     await run('INSERT INTO admin_credentials (id, username, password) VALUES (1, ?, ?)', ['manav2109', hashedPass]);
-    console.log('👤 Admin credentials initialized.');
+    logger.success('Admin credentials initialized.');
   }
 }
 
@@ -91,6 +109,22 @@ const authenticate = (req, res, next) => {
     res.status(401).json({ ok: false, error: 'Unauthorized access' });
   }
 };
+
+// ── Health Check (For Monitoring & Keep-Alive) ────────
+app.get('/api/health', (req, res) => {
+  // Check if DB is responsive
+  db.get('SELECT 1', (err) => {
+    if (err) {
+      return res.status(500).json({ status: 'error', database: 'disconnected', error: err.message });
+    }
+    res.json({
+      status: 'ok',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      database: 'connected'
+    });
+  });
+});
 
 // ─────────────────────────────────────────────────────
 // AUTH
@@ -134,7 +168,7 @@ app.post('/api/contact', async (req, res) => {
       'INSERT INTO submissions (name, email, phone, project, message) VALUES (?, ?, ?, ?, ?)',
       [name, email, phone || '', project || '', message || '']
     );
-    console.log(`📬 New submission #${result.lastID}: ${name} <${email}>`);
+    logger.info(`New submission #${result.lastID}: ${name} <${email}>`);
 
     res.json({ ok: true, id: result.lastID });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -199,7 +233,7 @@ app.post('/api/videos', authenticate, async (req, res) => {
       'INSERT INTO video_config (slot_id, drive_id, display_label) VALUES (?, ?, ?) ON CONFLICT(slot_id) DO UPDATE SET drive_id = excluded.drive_id, display_label = excluded.display_label',
       [slot_id, drive_id, display_label || '']
     );
-    console.log(`🎥 Video updated: ${slot_id} → ${drive_id}`);
+    logger.info(`Video updated: ${slot_id} → ${drive_id}`);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -209,20 +243,13 @@ app.post('/api/videos', authenticate, async (req, res) => {
 // ─────────────────────────────────────────────────────
 initDB().then(() => {
   app.listen(PORT, '0.0.0.0', () => {
-    console.log('');
-    console.log('╔════════════════════════════════════════════╗');
-    console.log('║  ✅  Server is running!                    ║');
-    console.log('║                                            ║');
-    console.log(`║  Local     : http://localhost:${PORT}         ║`);
-    console.log(`║  Network   : Please check your IP address   ║`);
-    console.log(`║  Admin     : http://localhost:${PORT}/admin.html ║`);
-    console.log('║                                            ║');
-    console.log('║  🔒 Security: API Protection Active        ║');
-    console.log('║  Press CTRL+C to stop                      ║');
-    console.log('╚════════════════════════════════════════════╝');
-    console.log('');
+    logger.success('Server is live! Access URLs below:');
+    console.log(`- Local     : http://localhost:${PORT}`);
+    console.log(`- Network   : 0.0.0.0:${PORT}`);
+    console.log(`- Admin     : http://localhost:${PORT}/admin.html`);
+    console.log('------------------------------------------------');
   });
 }).catch(err => {
-  console.error('Failed to initialize database:', err);
+  logger.error('Failed to initialize database: ' + err.message);
   process.exit(1);
 });

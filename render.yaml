@@ -4,11 +4,10 @@ services:
     env: node
     buildCommand: npm install
     startCommand: node server.js
+    healthCheckPath: /api/health
     plan: free
     envVars:
-      - key: GMAIL_USER
-        value: shraddhavideology@gmail.com
-      - key: GMAIL_PASS
-        sync: false        # You'll set this manually in Render dashboard
-      - key: NOTIFY_TO
-        value: shraddhavideology@gmail.com
+      - key: ADMIN_TOKEN
+        sync: false        # Set a secure random string in Render dashboard
+      - key: NODE_ENV
+        value: production

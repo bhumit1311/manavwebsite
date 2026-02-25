@@ -315,26 +315,48 @@ function setupHamburger() {
 // ─────────────────────────────────────────────────────────
 // CURSOR
 // ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────
+// CURSOR
+// ─────────────────────────────────────────────────────────
 function setupCursor() {
     const cursor = document.getElementById('cursor');
     if (!cursor) return;
     const dot = cursor.querySelector('.cursor-dot');
     const ring = cursor.querySelector('.cursor-ring');
     let cx = 0, cy = 0, rx = 0, ry = 0;
+    let firstMove = true;
 
     document.addEventListener('mousemove', (e) => {
         cx = e.clientX; cy = e.clientY;
+        if (firstMove) { rx = cx; ry = cy; firstMove = false; }
+    });
+
+    // Handle Hover States (Alternative to CSS :has for better compatibility)
+    document.addEventListener('mouseover', (e) => {
+        const target = e.target.closest('a, button, .portfolio-card, .reel-thumb');
+        if (target) cursor.classList.add('hovering');
+    });
+    document.addEventListener('mouseout', (e) => {
+        const target = e.target.closest('a, button, .portfolio-card, .reel-thumb');
+        if (!target) cursor.classList.remove('hovering');
     });
 
     function cursorLoop() {
+        // Smooth interpolation for the ring
         rx += (cx - rx) * 0.15; ry += (cy - ry) * 0.15;
-        dot.style.left = cx + 'px'; dot.style.top = cy + 'px';
-        ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+
+        if (dot) dot.style.transform = `translate(${cx}px, ${cy}px) translate(-50%, -50%)`;
+        if (ring) ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
+
         requestAnimationFrame(cursorLoop);
     }
     cursorLoop();
 
-    // Hide on mobile
+    // Hide cursor when leaving window
+    document.addEventListener('mouseleave', () => cursor.style.opacity = '0');
+    document.addEventListener('mouseenter', () => cursor.style.opacity = '1');
+
+    // Hide if touch device
     if ('ontouchstart' in window) cursor.style.display = 'none';
 }
 
@@ -579,11 +601,12 @@ function setupContactForm() {
         }
 
         try {
+            // First attempt
             const res = await fetch(`${SERVER_URL}/api/contact`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, phone, project, message }),
-                signal: AbortSignal.timeout(10000)
+                signal: AbortSignal.timeout(15000) // Longer timeout for Render sleep
             });
 
             if (res.ok) {
@@ -598,11 +621,13 @@ function setupContactForm() {
             }
         } catch (err) {
             console.error('Submission failed:', err);
+
+            // If it's a timeout or network error, it might be the Render free tier "waking up"
             if (statusDiv) {
-                statusDiv.textContent = '⚠ Could not reach server. Please try again later.';
+                statusDiv.textContent = '⏱ Server is waking up (Render free tier). Please wait 30s and try again.';
                 statusDiv.className = 'form-status visible error';
             }
-            showToast('Could not save message — please try again later.', 'error');
+            showToast('The server is currently waking up. Please try again in a moment.', 'error');
         } finally {
             if (submitBtn) {
                 submitBtn.innerHTML = originalText;
@@ -610,6 +635,19 @@ function setupContactForm() {
             }
         }
     });
+    // ── Keep-Alive (To prevent Render free tier sleep) ──
+    function startKeepAlive() {
+        // Ping every 10 mins (600,000ms)
+        setInterval(async () => {
+            try {
+                await fetch(`${SERVER_URL}/api/health`);
+                console.log('💓 Keep-alive ping sent');
+            } catch (e) {
+                console.warn('💓 Keep-alive ping failed (server may be sleeping)');
+            }
+        }, 600000);
+    }
+    startKeepAlive();
 }
 
 // ─────────────────────────────────────────────────────────
