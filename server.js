@@ -77,48 +77,82 @@ async function sendAutoReplyEmail(data) {
   if (!emailReady()) return;
   const { name, email, project } = data;
   const html = `
-    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#0a0a0f;color:#f0f0f0;border-radius:16px;overflow:hidden">
-      <div style="background:linear-gradient(135deg,#e8b86d,#c9922a);padding:32px 28px;text-align:center">
-        <div style="font-size:2rem;margin-bottom:8px">🎥</div>
-        <h2 style="margin:0;color:#0a0a0f;font-size:1.4rem;font-weight:800">Shraddha Videology</h2>
-        <p style="margin:4px 0 0;color:#0a0a0f;opacity:0.7;font-size:0.85rem">Thank you for reaching out!</p>
-      </div>
-      <div style="padding:32px 28px">
-        <p style="font-size:1.05rem;margin-top:0">Hi <strong>${name}</strong> 👋</p>
-        <p style="line-height:1.8;color:#ddd">
-          Thank you so much for getting in touch with us! We have successfully received your inquiry
-          ${project ? `about <strong style="color:#e8b86d">${project}</strong>` : ''} and are thrilled about the possibility of working together.
-        </p>
-        <div style="background:#111827;border-left:4px solid #e8b86d;border-radius:8px;padding:18px 20px;margin:24px 0">
-          <p style="margin:0;font-size:0.95rem;color:#e8b86d;font-weight:700">⏰ What happens next?</p>
-          <p style="margin:10px 0 0;color:#ccc;line-height:1.7;font-size:0.9rem">
-            Our team will personally review your project details and get back to you within <strong style="color:#fff">24 hours</strong>.
-            We look forward to discussing how we can bring your vision to life!
-          </p>
-        </div>
-        <p style="line-height:1.8;color:#aaa;font-size:0.88rem">
-          In the meantime, feel free to explore our latest work on our portfolio or reach out to us directly:
-        </p>
-        <div style="display:flex;gap:10px;margin:20px 0">
-          <a href="mailto:shraddhavideology@gmail.com" style="background:#1a1a2e;color:#e8b86d;border:1px solid #e8b86d;padding:10px 18px;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:600">📧 Email Us</a>
-          <a href="https://wa.me/917874712871" style="background:#25d366;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:600">💬 WhatsApp</a>
-        </div>
-        <p style="color:#ddd;line-height:1.7;margin-bottom:0">
-          Warm regards,<br/>
-          <strong style="color:#e8b86d">Shraddha</strong><br/>
-          <span style="color:#aaa;font-size:0.85rem">Shraddha Videology &amp; Production</span>
-        </p>
-      </div>
-      <div style="background:#050508;padding:16px 28px;text-align:center">
-        <p style="margin:0;color:#444;font-size:0.75rem">© 2025 Shraddha Videology. shraddhavideology@gmail.com</p>
-      </div>
+  <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:580px;margin:0 auto;background:#0d0d14;border-radius:18px;overflow:hidden;color:#f0f0f0">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#e8b86d 0%,#c9922a 100%);padding:38px 32px;text-align:center">
+      <div style="font-size:2.4rem;margin-bottom:10px">�</div>
+      <h1 style="margin:0;color:#0d0d14;font-size:1.5rem;font-weight:800;letter-spacing:1px">SHRADDHA VIDEOLOGY</h1>
+      <p style="margin:6px 0 0;color:#0d0d14;font-size:0.9rem;opacity:0.75">Professional Video Editor &amp; Visual Storyteller</p>
     </div>
+
+    <!-- Body -->
+    <div style="padding:36px 32px">
+
+      <p style="font-size:1.15rem;margin:0 0 6px;font-weight:600">Dear ${name},</p>
+      <p style="font-size:1.05rem;margin:0 0 22px;color:#e8b86d;font-weight:500">Thank you so much for reaching out! �</p>
+
+      <p style="line-height:1.85;color:#ccc;margin:0 0 20px">
+        We're truly delighted that you chose <strong style="color:#fff">Shraddha Videology</strong> for your project.
+        Your inquiry${project ? ` regarding <strong style="color:#e8b86d">${project}</strong>` : ''} has been
+        received successfully, and we're already excited about the possibility of bringing your vision to life!
+      </p>
+
+      <!-- 24hr Promise Box -->
+      <div style="background:#12121f;border:1px solid #e8b86d33;border-left:4px solid #e8b86d;border-radius:10px;padding:20px 22px;margin:28px 0">
+        <p style="margin:0 0 8px;color:#e8b86d;font-weight:700;font-size:1rem">⏰ What happens next?</p>
+        <p style="margin:0;color:#ccc;line-height:1.8;font-size:0.92rem">
+          I will personally review your message and reach out to you within
+          <strong style="color:#ffffff;font-size:1rem"> 24 hours</strong>.
+          Together, we'll discuss your creative requirements and craft something truly special. 🎥✨
+        </p>
+      </div>
+
+      <p style="line-height:1.8;color:#aaa;font-size:0.9rem;margin:0 0 24px">
+        If you have any urgent queries in the meantime, feel free to contact us directly —
+        we're always happy to help!
+      </p>
+
+      <!-- Buttons -->
+      <table cellpadding="0" cellspacing="0" style="margin-bottom:28px">
+        <tr>
+          <td style="padding-right:12px">
+            <a href="mailto:shraddhavideology@gmail.com"
+               style="display:inline-block;background:transparent;color:#e8b86d;border:1.5px solid #e8b86d;padding:11px 20px;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:600">
+              📧 Email Us
+            </a>
+          </td>
+          <td>
+            <a href="https://wa.me/917874712871"
+               style="display:inline-block;background:#25d366;color:#fff;padding:11px 20px;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:600">
+              💬 WhatsApp
+            </a>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Sign-off -->
+      <p style="line-height:1.9;color:#ddd;margin:0;border-top:1px solid #1e1e2e;padding-top:22px">
+        With warm regards,<br/>
+        <strong style="font-size:1.15rem;color:#e8b86d">Shraddha</strong><br/>
+        <span style="color:#888;font-size:0.85rem">Shraddha Videology &amp; Production</span><br/>
+        <span style="color:#555;font-size:0.8rem">shraddhavideology@gmail.com &nbsp;|&nbsp; +91 78747 12871</span>
+      </p>
+
+    </div>
+
+    <!-- Footer -->
+    <div style="background:#080810;padding:16px 32px;text-align:center">
+      <p style="margin:0;color:#333;font-size:0.75rem">© 2025 Shraddha Videology. All rights reserved.</p>
+    </div>
+
+  </div>
   `;
   await transporter.sendMail({
     from: `"Shraddha Videology" <${GMAIL_USER}>`,
     to: email,
     replyTo: GMAIL_USER,
-    subject: `🎥 We received your inquiry, ${name}! — Shraddha Videology`,
+    subject: `� Thank You, ${name}! We'll be in touch within 24 hours — Shraddha Videology`,
     html
   });
   console.log(`✉️  Auto-reply sent to ${email}`);
