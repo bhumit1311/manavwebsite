@@ -923,30 +923,69 @@
         }
 
         async function doLogin() {
-            const user = document.getElementById('login-user').value;
+            const user = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value;
             const err = document.getElementById('login-error');
+            const signInBtn = document.querySelector('#login-screen button[onclick="doLogin()"]');
 
-            try {
-                const res = await fetch(`${API_BASE}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: user, password: pass })
-                });
-                const data = await res.json();
-
-                if (data.ok) {
-                    localStorage.setItem('sv_admin_token', data.token);
-                    localStorage.setItem('sv_admin_user', data.username);
-                    initDashboard();
-                } else {
-                    err.style.display = 'block';
-                    err.innerText = data.error || 'Login failed';
-                }
-            } catch (e) {
+            if (!user || !pass) {
                 err.style.display = 'block';
-                err.innerText = 'Server unreachable';
+                err.innerText = 'Please enter username and password.';
+                return;
             }
+
+            // Disable button during login attempt
+            if (signInBtn) { signInBtn.disabled = true; signInBtn.textContent = 'Connecting...'; }
+            err.style.display = 'none';
+
+            const MAX_RETRIES = 6;   // 6 attempts × 6s = ~36 seconds to wake Render
+            const RETRY_DELAY = 6000;
+
+            for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+                    const res = await fetch(`${API_BASE}/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: user, password: pass }),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+
+                    const data = await res.json();
+
+                    if (data.ok) {
+                        localStorage.setItem('sv_admin_token', data.token);
+                        localStorage.setItem('sv_admin_user', data.username);
+                        if (signInBtn) { signInBtn.disabled = false; signInBtn.textContent = 'Sign In →'; }
+                        initDashboard();
+                        return;
+                    } else {
+                        // Wrong credentials — don't retry
+                        err.style.display = 'block';
+                        err.innerText = data.error || 'Incorrect username or password';
+                        if (signInBtn) { signInBtn.disabled = false; signInBtn.textContent = 'Sign In →'; }
+                        return;
+                    }
+                } catch (e) {
+                    // Network error / timeout — server is sleeping, retry
+                    if (attempt < MAX_RETRIES) {
+                        err.style.display = 'block';
+                        err.style.color = '#f0a500';
+                        const remaining = MAX_RETRIES - attempt;
+                        err.innerText = `⏱ Server waking up… retrying (${remaining} left)`;
+                        await new Promise(r => setTimeout(r, RETRY_DELAY));
+                    }
+                }
+            }
+
+            // All retries exhausted
+            err.style.display = 'block';
+            err.style.color = '#f87171';
+            err.innerText = '❌ Server unavailable. Please try again in 1 minute.';
+            if (signInBtn) { signInBtn.disabled = false; signInBtn.textContent = 'Sign In →'; }
         }
 
         function doLogout() {
