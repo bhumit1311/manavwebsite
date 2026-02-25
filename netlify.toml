@@ -1,3 +1,16 @@
-<!-- Netlify Forms fallback config (only used if deployed on Netlify) -->
-<!-- This file is intentionally blank — your form in index.html already has Netlify detection via action="https://formspree.io/..." -->
-<!-- See SETUP_GUIDE.md for full instructions -->
+[build]
+  publish = "."
+  command = ""
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
