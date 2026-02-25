@@ -1026,7 +1026,7 @@
 
             checkServerStatus();
             loadSubmissions();
-            loadVideos();
+            await buildVideoSlots(); // Build video manager slots on dashboard load
         }
 
         async function checkServerStatus() {
@@ -1051,14 +1051,26 @@
         }
 
         // ── SUBMISSIONS ──
-        async function loadSubmissions() {
+        async function loadSubmissions(filter, el) {
+            // Handle filter pill clicks
+            if (filter) {
+                currentFilter = filter;
+                document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+                if (el) el.classList.add('active');
+                renderSubmissions();
+                return;
+            }
+            const container = document.getElementById('submissions-list');
+            if (container) container.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted)">Loading submissions...</div>';
             try {
                 const res = await apiFetch('/submissions');
+                if (!res.ok) throw new Error('Server error: ' + res.status);
                 currentSubmissions = await res.json();
                 renderSubmissions();
                 updateStats();
             } catch (e) {
-                console.error('Failed to load submissions');
+                console.error('Failed to load submissions:', e);
+                if (container) container.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div>Could not load submissions.<br><small style="color:var(--muted)">Server may be waking up — please wait 30s and refresh.</small></div>';
             }
         }
 
@@ -1233,7 +1245,7 @@
             // Load saved config from server DB, fall back to localStorage
             let savedConfig = {};
             try {
-                const res = await fetch(`${API}/videos`);
+                const res = await fetch(`${API_BASE}/videos`);
                 if (res.ok) savedConfig = await res.json();
             } catch { }
             // Merge with localStorage saved config
