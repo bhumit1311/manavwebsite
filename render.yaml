@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: shraddha-videology-api
+    name: shraddhavideology
     env: node
     buildCommand: npm install
     startCommand: node server.js
