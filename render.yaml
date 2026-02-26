@@ -6,8 +6,3 @@ services:
     startCommand: node server.js
     healthCheckPath: /api/health
     plan: free
-    envVars:
-      - key: ADMIN_TOKEN
-        value: sv-admin-2024-manav
-      - key: NODE_ENV
-        value: production

@@ -37,11 +37,14 @@ body {
     color: var(--text);
     font-family: var(--font-body);
     overflow-x: hidden;
-    cursor: none;
 }
 
 body.intro-active {
     overflow: hidden;
+}
+
+body.has-custom-cursor {
+    cursor: none;
 }
 
 /* =============================================

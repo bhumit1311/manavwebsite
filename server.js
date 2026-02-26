@@ -24,7 +24,12 @@ const logger = {
 const app = express();
 const PORT = process.env.PORT || 3001;
 const DB_PATH = path.join(__dirname, 'database.db');
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'sv-admin-2024-manav';
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
+
+if (process.env.NODE_ENV === 'production' && !ADMIN_TOKEN) {
+  logger.error('ADMIN_TOKEN must be set in production');
+  process.exit(1);
+}
 
 // ── Global Process Protection ─────────────────────────
 process.on('uncaughtException', (err) => {
@@ -102,12 +107,12 @@ app.use((req, res, next) => {
 
 // Auth Middleware
 const authenticate = (req, res, next) => {
-  const token = req.headers['authorization'];
-  if (token === `Bearer ${ADMIN_TOKEN}`) {
-    next();
-  } else {
-    res.status(401).json({ ok: false, error: 'Unauthorized access' });
+  const authHeader = req.headers.authorization || '';
+  const [scheme, token] = authHeader.split(' ');
+  if (scheme === 'Bearer' && token && token === ADMIN_TOKEN) {
+    return next();
   }
+  return res.status(401).json({ ok: false, error: 'Unauthorized access' });
 };
 
 // ── Health Check (For Monitoring & Keep-Alive) ────────
@@ -134,7 +139,9 @@ app.post('/api/login', async (req, res) => {
   try {
     const { username, password } = req.body;
     const creds = await get('SELECT * FROM admin_credentials WHERE id = 1');
-
+    if (!creds) {
+      return res.status(500).json({ ok: false, error: 'Admin credentials not initialized' });
+    }
     const match = await bcrypt.compare(password, creds.password);
     if (username === creds.username && match) {
       res.json({ ok: true, username, token: ADMIN_TOKEN });

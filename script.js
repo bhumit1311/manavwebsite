@@ -4,6 +4,16 @@
 
 'use strict';
 
+// ─── Helpers ─────────────────────────────────────────
+function fetchWithTimeout(url, options = {}, ms = 10000) {
+    if (window.AbortSignal && typeof AbortSignal.timeout === 'function') {
+        return fetch(url, { ...options, signal: AbortSignal.timeout(ms) });
+    }
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), ms);
+    return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(id));
+}
+
 // ─── Portfolio Data ──────────────────────────────────
 const PORTFOLIO = [
     { id: 1, title: 'Fortune Air Diwali Reel', category: 'commercial', tools: 'Premiere Pro, After Effects', client: 'Fortune Air', desc: 'High-energy Diwali commercial reel for Fortune Air — vibrant colour grading and dynamic cuts.', driveId: '19aApncxKmJWu9k17OfMq3gJWkmTsZklk', emoji: '🎬' },
@@ -45,7 +55,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setupScrollReveal();
     setupCounters();
     setupSkillBars();
+    loadVideoConfigFromServer(); // Sync video config from admin panel
 });
+
 
 // ─────────────────────────────────────────────────────────
 // LOADING SCREEN
@@ -321,6 +333,7 @@ function setupHamburger() {
 function setupCursor() {
     const cursor = document.getElementById('cursor');
     if (!cursor) return;
+    document.body.classList.add('has-custom-cursor');
     const dot = cursor.querySelector('.cursor-dot');
     const ring = cursor.querySelector('.cursor-ring');
     let cx = 0, cy = 0, rx = 0, ry = 0;
@@ -602,11 +615,10 @@ function setupContactForm() {
 
         try {
             // First attempt
-            const res = await fetch(`${SERVER_URL}/api/contact`, {
+            const res = await fetchWithTimeout(`${SERVER_URL}/api/contact`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, phone, project, message }),
-                signal: AbortSignal.timeout(15000) // Longer timeout for Render sleep
+                body: JSON.stringify({ name, email, phone, project, message })
             });
 
             if (res.ok) {
@@ -695,3 +707,93 @@ window.addEventListener('scroll', () => {
         hero.style.opacity = 1 - scrollY / 600;
     }
 });
+
+// ─────────────────────────────────────────────────────────
+// LOAD VIDEO CONFIG FROM SERVER (Admin Panel Sync)
+// ─────────────────────────────────────────────────────────
+// Maps admin slot IDs → PORTFOLIO array indexes and showreel thumb indexes
+const SLOT_TO_PORTFOLIO = {
+    'slot_fortune': 0,  // PORTFOLIO[0]  = Fortune Air Diwali Reel
+    'slot_hiren': 1,  // PORTFOLIO[1]  = Hiren & Krishna Teaser
+    'slot_jayneel': 2,  // PORTFOLIO[2]  = Jayneel Riya Reel
+    'slot_nazarbaug': 3,  // PORTFOLIO[3]  = Nazarbaug Diwali Reel
+    'slot_neimish': 4,  // PORTFOLIO[4]  = Neimish Creative Reel
+    'slot_shreenand': 5,  // PORTFOLIO[5]  = Shreenand New Reel
+    'slot_sequence': 6,  // PORTFOLIO[6]  = Sequence Edit
+    'slot_engagement': 7,  // PORTFOLIO[7]  = Engagement Reel
+    'slot_final': 8,  // PORTFOLIO[8]  = Final Reel
+    'slot_dental': 9,  // PORTFOLIO[9]  = Pure Dental Opening Reel
+};
+
+// Showreel thumbnails in index.html are in this order (0-indexed):
+// 0=Final, 1=Fortune, 2=Hiren, 3=Jayneel, 4=Nazarbaug, 5=Neimish, 6=Shreenand, 7=Sequence, 8=Engagement, 9=Dental
+const SLOT_TO_SHOWREEL = {
+    'slot_final': 0,
+    'slot_fortune': 1,
+    'slot_hiren': 2,
+    'slot_jayneel': 3,
+    'slot_nazarbaug': 4,
+    'slot_neimish': 5,
+    'slot_shreenand': 6,
+    'slot_sequence': 7,
+    'slot_engagement': 8,
+    'slot_dental': 9,
+};
+
+async function loadVideoConfigFromServer() {
+    // Determine Server URL
+    const isIP = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(location.hostname);
+    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || isIP;
+    const SERVER_URL = isLocal ? `http://${location.hostname}:3001` : 'https://manavwebsite.onrender.com';
+
+    try {
+        const res = await fetchWithTimeout(`${SERVER_URL}/api/videos`, {}, 10000);
+        if (!res.ok) return; // Server error — keep defaults
+        const config = await res.json();
+
+        if (!config || Object.keys(config).length === 0) return; // No config saved yet
+
+        const reelThumbs = document.querySelectorAll('.reel-thumb');
+        const mainIframe = document.getElementById('main-reel-iframe');
+
+        Object.keys(config).forEach(slotId => {
+            const driveId = config[slotId].drive_id;
+            const label = config[slotId].display_label;
+            if (!driveId) return;
+
+            // 1. Update PORTFOLIO array (for modal playback)
+            const portfolioIdx = SLOT_TO_PORTFOLIO[slotId];
+            if (portfolioIdx !== undefined && PORTFOLIO[portfolioIdx]) {
+                PORTFOLIO[portfolioIdx].driveId = driveId;
+            }
+
+            // 2. Update showreel thumbnails in the DOM
+            const showreelIdx = SLOT_TO_SHOWREEL[slotId];
+            if (showreelIdx !== undefined && reelThumbs[showreelIdx]) {
+                const thumb = reelThumbs[showreelIdx];
+                const img = thumb.querySelector('img');
+                if (img) img.src = `https://drive.google.com/thumbnail?id=${driveId}&sz=w400`;
+
+                const labelEl = thumb.querySelector('.reel-thumb-label');
+                if (labelEl && label) labelEl.textContent = label;
+
+                // Update onclick handler with new driveId and label
+                const num = showreelIdx + 1;
+                const displayTitle = label || thumb.querySelector('.reel-thumb-label')?.textContent || '';
+                thumb.setAttribute('onclick', `playReel(this,'${driveId}','${displayTitle}',${num})`);
+
+                // If this is the first thumb (active by default) and it's slot_final, update main iframe
+                if (slotId === 'slot_final' && mainIframe) {
+                    mainIframe.src = `https://drive.google.com/file/d/${driveId}/preview`;
+                    const titleEl = document.getElementById('main-reel-title');
+                    if (titleEl && label) titleEl.textContent = `🎬 ${label} — Studio Showcase`;
+                }
+            }
+        });
+
+        console.log('✅ Video config loaded from server');
+    } catch (e) {
+        // Server unreachable (e.g. Render sleeping) — silently keep hardcoded defaults
+        console.log('💤 Server not reachable — using default video config');
+    }
+}

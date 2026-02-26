@@ -934,11 +934,10 @@
                 return;
             }
 
-            // Disable button during login attempt
             if (signInBtn) { signInBtn.disabled = true; signInBtn.textContent = 'Connecting...'; }
             err.style.display = 'none';
 
-            const MAX_RETRIES = 6;   // 6 attempts × 6s = ~36 seconds to wake Render
+            const MAX_RETRIES = 6;
             const RETRY_DELAY = 6000;
 
             for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
@@ -963,14 +962,13 @@
                         initDashboard();
                         return;
                     } else {
-                        // Wrong credentials — don't retry
                         err.style.display = 'block';
+                        err.style.color = '#f87171';
                         err.innerText = data.error || 'Incorrect username or password';
                         if (signInBtn) { signInBtn.disabled = false; signInBtn.textContent = 'Sign In →'; }
                         return;
                     }
                 } catch (e) {
-                    // Network error / timeout — server is sleeping, retry
                     if (attempt < MAX_RETRIES) {
                         err.style.display = 'block';
                         err.style.color = '#f0a500';
@@ -981,7 +979,6 @@
                 }
             }
 
-            // All retries exhausted
             err.style.display = 'block';
             err.style.color = '#f87171';
             err.innerText = '❌ Server unavailable. Please try again in 1 minute.';
@@ -994,7 +991,7 @@
             location.reload();
         }
 
-        // ── API HELPERS ──
+        // ── API HELPER (always sends auth header) ──
         async function apiFetch(endpoint, options = {}) {
             const token = getAuthToken();
             const headers = {
@@ -1002,43 +999,35 @@
                 ...options.headers,
             };
             if (token) headers['Authorization'] = `Bearer ${token}`;
-
-            const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-            return res; // Return response for caller to handle status codes
+            return fetch(`${API_BASE}${endpoint}`, { ...options, headers });
         }
 
         // ── INITIALIZE ──
         window.onload = () => {
-            const token = getAuthToken();
-            if (token) {
-                initDashboard();
-            }
+            if (getAuthToken()) initDashboard();
         };
 
         async function initDashboard() {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            document.getElementById('topbar-user').innerText = localStorage.getItem('sv_admin_user') || 'Admin';
+            document.getElementById('topbar-user').innerHTML = `Signed in as <strong>${localStorage.getItem('sv_admin_user') || 'Admin'}</strong>`;
 
             checkServerStatus();
             loadSubmissions();
-            await buildVideoSlots(); // Build video manager slots on dashboard load
+            buildVideoSlots();
         }
 
         async function checkServerStatus() {
             const pill = document.getElementById('srv-label');
             const dot = document.getElementById('srv-dot');
             const note = document.getElementById('server-note');
-
             try {
-                const res = await fetch(`${API_BASE}/videos`);
+                const res = await fetch(`${API_BASE}/health`);
                 if (res.ok) {
                     pill.innerText = 'Connected';
                     dot.style.background = '#4ade80';
                     note.style.display = 'none';
-                } else {
-                    throw new Error();
-                }
+                } else { throw new Error(); }
             } catch (e) {
                 pill.innerText = 'Offline';
                 dot.style.background = '#f87171';
@@ -1047,17 +1036,19 @@
         }
 
         // ── SUBMISSIONS ──
-        async function loadSubmissions(filter, el) {
+        async function loadSubmissions(filter, pillEl) {
             // Handle filter pill clicks
             if (filter) {
                 currentFilter = filter;
                 document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-                if (el) el.classList.add('active');
+                if (pillEl) pillEl.classList.add('active');
                 renderSubmissions();
                 return;
             }
+
             const container = document.getElementById('submissions-list');
             if (container) container.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted)">Loading submissions...</div>';
+
             try {
                 const res = await apiFetch('/submissions');
                 if (res.status === 401) {
@@ -1066,6 +1057,7 @@
                 }
                 if (!res.ok) throw new Error('Server error: ' + res.status);
                 currentSubmissions = await res.json();
+
                 renderSubmissions();
                 updateStats();
             } catch (e) {
@@ -1076,48 +1068,63 @@
 
         function renderSubmissions() {
             const container = document.getElementById('submissions-list');
+            if (!container) return;
             const filtered = currentSubmissions.filter(s => {
                 if (currentFilter === 'unread') return !s.is_read;
+                if (currentFilter === 'read') return !!s.is_read;
                 return true;
             });
 
             if (filtered.length === 0) {
-                container.innerHTML = `<div class="empty-state"><div class="empty-icon">📂</div>No submissions found</div>`;
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div>No submissions found.</div></div>';
                 return;
             }
 
             container.innerHTML = filtered.map(s => `
-                <div class="sub-card ${s.is_read ? '' : 'unread'}">
+                <div class="sub-card ${s.is_read ? '' : 'unread'}" id="subcard-${s.id}">
                     <div class="sub-header">
-                        <div class="sub-avatar">${s.name[0].toUpperCase()}</div>
+                        <div class="sub-avatar">${(s.name || '?')[0].toUpperCase()}</div>
                         <div>
-                            <div class="sub-name">${s.name}</div>
-                            <div class="sub-email">${s.email}</div>
+                            <div class="sub-name">${s.name || 'Unknown'}</div>
+                            <div class="sub-email">${s.email || 'No email'}</div>
                         </div>
-                        <div class="sub-time">${new Date(s.created_at).toLocaleDateString()}</div>
+                        <div class="sub-time">${formatDate(s.created_at)}</div>
                     </div>
-                    <div class="sub-project"># ${s.project || 'General'}</div>
-                    <div class="sub-message">${s.message}</div>
-                    <div class="sub-phone">📞 ${s.phone || 'N/A'}</div>
+                    ${s.project ? `<span class="sub-project">📁 ${s.project}</span>` : ''}
+                    <div class="sub-message">${s.message || '(no message)'}</div>
+                    ${s.phone ? `<div class="sub-phone">📞 ${s.phone}</div>` : ''}
                     <div class="sub-actions">
-                        ${!s.is_read ? `<button class="sub-btn reply" onclick="markRead(${s.id})">Mark Read</button>` : ''}
-                        <button class="sub-btn delete" onclick="deleteSub(${s.id})">Delete</button>
+                        ${!s.is_read ? `<button class="sub-btn reply" onclick="markRead(${s.id})">✅ Mark Read</button>` : ''}
+                        ${s.email ? `<button class="sub-btn reply" onclick="replyTo('${s.email}','${(s.name || '').replace(/'/g, "\\'")}')">📧 Reply</button>` : ''}
+                        ${s.phone ? `<button class="sub-btn reply" onclick="window.open('https://wa.me/91${(s.phone || '').replace(/\\D/g, '')}')">💬 WhatsApp</button>` : ''}
+                        <button class="sub-btn delete" onclick="deleteSub(${s.id})">🗑️ Delete</button>
                     </div>
                 </div>
             `).join('');
         }
 
+        function replyTo(email, name) {
+            window.open(`mailto:${email}?subject=Re: Your inquiry — Shraddha Videology&body=Hi ${name},%0A%0AThank you for reaching out!%0A%0A`);
+        }
+
         async function markRead(id) {
             await apiFetch(`/submissions/${id}/read`, { method: 'PATCH' });
+            showToast('✅ Marked as read');
             loadSubmissions();
-            showToast('Marked as read');
         }
 
         async function deleteSub(id) {
-            if (!confirm('Are you sure?')) return;
+            if (!confirm('Delete this submission?')) return;
             await apiFetch(`/submissions/${id}`, { method: 'DELETE' });
-            loadSubmissions();
             showToast('Submission deleted');
+            loadSubmissions();
+        }
+
+        async function clearAllSubs() {
+            if (!confirm('Delete ALL submissions from the database? This cannot be undone.')) return;
+            await apiFetch('/submissions', { method: 'DELETE' });
+            showToast('All submissions cleared');
+            loadSubmissions();
         }
 
         function updateStats() {
@@ -1125,95 +1132,34 @@
             const unreadCount = currentSubmissions.filter(s => !s.is_read).length;
             document.getElementById('stat-new').innerText = unreadCount;
             document.getElementById('sub-badge').innerText = unreadCount;
+            loadOverview();
         }
 
-        function filterSub(type, el) {
-            currentFilter = type;
-            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-            el.classList.add('active');
-            renderSubmissions();
+        function loadOverview() {
+            const overviewEl = document.getElementById('overview-subs');
+            if (!overviewEl) return;
+            const recent = currentSubmissions.slice(0, 4);
+            if (!recent.length) {
+                overviewEl.innerHTML = '<div style="color:var(--muted);text-align:center;padding:30px 0;font-size:0.85rem">No submissions yet.</div>';
+            } else {
+                overviewEl.innerHTML = recent.map(s => `
+                    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+                        <div style="width:34px;height:34px;border-radius:50%;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;color:var(--accent);flex-shrink:0">${(s.name || '?')[0].toUpperCase()}</div>
+                        <div style="flex:1;min-width:0">
+                            <div style="font-size:0.88rem;font-weight:600">${s.name || 'Unknown'}</div>
+                            <div style="font-size:0.75rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.email || ''} · ${s.project || 'General Inquiry'}</div>
+                        </div>
+                        <div style="font-size:0.72rem;color:var(--muted);white-space:nowrap">${formatDate(s.created_at)}</div>
+                    </div>
+                `).join('');
+            }
         }
 
         async function exportSubs() {
-            const token = getAuthToken();
-            window.location.href = `${API_BASE}/submissions/export?token=${token}`;
-            // Note: In a real app, you'd use a temporary download token for GET requests or a blob fetch
+            window.open(`${API_BASE}/submissions/export`);
         }
 
         // ── VIDEO MANAGER ──
-        async function loadVideos() {
-            try {
-                const res = await apiFetch('/videos');
-                const config = await res.json();
-                Object.keys(config).forEach(slot => {
-                    const driveIdInput = document.querySelector(`[data-slot="${slot}"] .drive-id-input`);
-                    const labelInput = document.querySelector(`[data-slot="${slot}"] .label-input`);
-                    if (driveIdInput) driveIdInput.value = config[slot].drive_id;
-                    if (labelInput) labelInput.value = config[slot].display_label;
-                });
-            } catch (e) { }
-        }
-
-        async function saveVideoSlot(slot) {
-            const drive_id = document.querySelector(`[data-slot="${slot}"] .drive-id-input`).value;
-            const display_label = document.querySelector(`[data-slot="${slot}"] .label-input`).value;
-
-            try {
-                const res = await apiFetch('/videos', {
-                    method: 'POST',
-                    body: JSON.stringify({ slot_id: slot, drive_id, display_label })
-                });
-                if (res.ok) showToast('Video settings saved');
-            } catch (e) {
-                showToast('Save failed', 'error');
-            }
-        }
-
-        // ── SETTINGS ──
-        async function saveCredentials() {
-            const user = document.getElementById('new-user').value;
-            const pass = document.getElementById('new-pass').value;
-            const confirmPass = document.getElementById('confirm-pass').value;
-
-            if (!user || !pass || !confirmPass) return showToast('Fill all fields', 'error');
-            if (pass !== confirmPass) return showToast('Passwords do not match', 'error');
-
-            try {
-                const res = await apiFetch('/credentials', {
-                    method: 'POST',
-                    body: JSON.stringify({ username: user, password: pass })
-                });
-                if (res.ok) {
-                    showToast('Credentials updated. Please login again.');
-                    setTimeout(doLogout, 2000);
-                }
-            } catch (e) {
-                showToast('Update failed', 'error');
-            }
-        }
-
-        // ── UI HELPERS ──
-        function showPage(id, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(`page-${id}`).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            if (el) el.classList.add('active');
-        }
-
-        function showToast(msg, type = 'success') {
-            const t = document.getElementById('admin-toast'); // Changed from 'toast' to 'admin-toast'
-            t.innerText = msg;
-            t.className = `admin-toast show ${type}`;
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
-
-        function toggleServerHelp() {
-            const p = document.getElementById('srv-popover');
-            p.style.display = p.style.display === 'none' ? 'block' : 'none';
-        }
-
-        // ── VIDEO MANAGER ──
-        // Default Drive IDs for all 10 showreel videos
         const VIDEO_SLOTS = [
             { id: 'slot_final', title: 'Final Reel', cat: 'Showreel', defId: '1mNZxiQrEtQaVgLbBra-7_jDwv4QdP8rf', defLabel: 'Final Reel' },
             { id: 'slot_fortune', title: 'Fortune Air Diwali', cat: 'Commercial', defId: '19aApncxKmJWu9k17OfMq3gJWkmTsZklk', defLabel: 'Fortune Air' },
@@ -1227,33 +1173,29 @@
             { id: 'slot_dental', title: 'Pure Dental Opening', cat: 'Corporate', defId: '1MN39UX73rPlhKgGNx1hk1JQq6TUs-7QY', defLabel: 'Pure Dental' },
         ];
 
-        // Extract Google Drive file ID from any share URL format
         function parseDriveId(input) {
             input = input.trim();
-            // Already a bare ID (no slashes or dots)
             if (/^[\w-]{25,}$/.test(input)) return input;
-            // https://drive.google.com/file/d/FILE_ID/view
             const m = input.match(/\/d\/([-\w]+)/);
             if (m) return m[1];
-            // https://drive.google.com/open?id=FILE_ID
             const m2 = input.match(/[?&]id=([-\w]+)/);
             if (m2) return m2[1];
             return null;
         }
 
         async function buildVideoSlots() {
-            // Load saved config from server DB, fall back to localStorage
             let savedConfig = {};
             try {
-                const res = await fetch(`${API_BASE}/videos`);
+                const res = await apiFetch('/videos'); // Use apiFetch for auth
                 if (res.ok) savedConfig = await res.json();
             } catch { }
-            // Merge with localStorage saved config
             const lsConfig = JSON.parse(localStorage.getItem('sv_video_config') || '{}');
             savedConfig = { ...lsConfig, ...savedConfig };
 
             const container = document.getElementById('video-slots');
+            if (!container) return;
             container.innerHTML = '';
+
             VIDEO_SLOTS.forEach(slot => {
                 const saved = savedConfig[slot.id] || {};
                 const driveId = saved.drive_id || slot.defId;
@@ -1300,126 +1242,20 @@
             lsConfig[slotId] = { drive_id: driveId, display_label: displayLabel };
             localStorage.setItem('sv_video_config', JSON.stringify(lsConfig));
 
-            // Save to server DB (when online)
+            // Save to server DB with auth
             try {
-                await fetch(`${API}/videos`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                const res = await apiFetch('/videos', {
+                    method: 'POST',
                     body: JSON.stringify({ slot_id: slotId, drive_id: driveId, display_label: displayLabel })
                 });
-                showToast('✅ Video updated & saved!', 'success');
+                if (res.ok) {
+                    showToast('✅ Video updated & saved to server!', 'success');
+                } else {
+                    showToast('⚠️ Saved locally but server returned error', 'error');
+                }
             } catch {
                 showToast('✅ Saved locally (server offline — will sync when online)', 'success');
             }
-        }
-
-        // ── OVERVIEW ──
-        async function loadOverview() {
-            try {
-                const res = await fetch(`${API}/submissions`);
-                allSubmissions = await res.json();
-                const unread = allSubmissions.filter(s => !s.is_read);
-                document.getElementById('stat-total').textContent = allSubmissions.length;
-                document.getElementById('stat-new').textContent = unread.length;
-                document.getElementById('sub-badge').textContent = unread.length;
-
-                const overviewEl = document.getElementById('overview-subs');
-                const recent = allSubmissions.slice(0, 4);
-                if (!recent.length) {
-                    overviewEl.innerHTML = `<div style="color:var(--muted);text-align:center;padding:30px 0;font-size:0.85rem">No submissions yet.</div>`;
-                } else {
-                    overviewEl.innerHTML = recent.map(s => `
-                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
-                    <div style="width:34px;height:34px;border-radius:50%;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;color:var(--accent);flex-shrink:0">${(s.name || '?')[0].toUpperCase()}</div>
-                    <div style="flex:1;min-width:0">
-                        <div style="font-size:0.88rem;font-weight:600">${s.name || 'Unknown'}</div>
-                        <div style="font-size:0.75rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.email || ''} · ${s.project || 'General Inquiry'}</div>
-                    </div>
-                    <div style="font-size:0.72rem;color:var(--muted);white-space:nowrap">${formatDate(s.created_at)}</div>
-                </div>
-            `).join('');
-                }
-            } catch {
-                document.getElementById('overview-subs').innerHTML = `<div style="color:var(--danger);text-align:center;padding:20px;font-size:0.85rem">⚠️ Cannot connect to server.</div>`;
-            }
-        }
-
-        // ── SUBMISSIONS ──
-        async function loadSubmissions(filter = 'all', pillEl) {
-            if (pillEl) {
-                document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-                pillEl.classList.add('active');
-            }
-            try {
-                const res = await fetch(`${API}/submissions`);
-                allSubmissions = await res.json();
-                // Mark all as read
-                allSubmissions.filter(s => !s.is_read).forEach(s => {
-                    fetch(`${API}/submissions/${s.id}/read`, { method: 'PATCH' });
-                });
-                const unread = allSubmissions.filter(s => !s.is_read).length;
-                document.getElementById('sub-badge').textContent = unread;
-                document.getElementById('stat-new').textContent = unread;
-
-                let filtered = allSubmissions;
-                if (filter === 'unread') filtered = allSubmissions.filter(s => !s.is_read);
-                else if (filter === 'read') filtered = allSubmissions.filter(s => s.is_read);
-
-                renderSubmissions(filtered);
-            } catch {
-                document.getElementById('submissions-list').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div>Cannot connect to server. Make sure START.bat is running.</div>`;
-            }
-        }
-
-        function renderSubmissions(subs) {
-            const el = document.getElementById('submissions-list');
-            if (!subs.length) {
-                el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div>No submissions found.</div></div>`;
-                return;
-            }
-            el.innerHTML = subs.map(s => `
-        <div class="sub-card ${s.is_read ? '' : 'unread'}" id="subcard-${s.id}">
-            <div class="sub-header">
-                <div class="sub-avatar">${(s.name || '?')[0].toUpperCase()}</div>
-                <div>
-                    <div class="sub-name">${s.name || 'Unknown'}</div>
-                    <div class="sub-email">${s.email || 'No email'}</div>
-                </div>
-                <div class="sub-time">${formatDate(s.created_at)}</div>
-            </div>
-            ${s.project ? `<span class="sub-project">📁 ${s.project}</span>` : ''}
-            <div class="sub-message">${s.message || '(no message)'}</div>
-            ${s.phone ? `<div class="sub-phone">📞 ${s.phone}</div>` : ''}
-            <div class="sub-actions">
-                ${s.email ? `<button class="sub-btn reply" onclick="replyTo('${s.email}','${s.name || ''}')">📧 Reply</button>` : ''}
-                ${s.phone ? `<button class="sub-btn reply" onclick="window.open('https://wa.me/91${(s.phone || '').replace(/\\D/g, '')}')">💬 WhatsApp</button>` : ''}
-                <button class="sub-btn delete" onclick="deleteSub(${s.id})">🗑️ Delete</button>
-            </div>
-        </div>
-    `).join('');
-        }
-
-        function replyTo(email, name) {
-            window.open(`mailto:${email}?subject=Re: Your inquiry — Shraddha Videology&body=Hi ${name},%0A%0AThank you for reaching out!%0A%0A`);
-        }
-
-        async function deleteSub(id) {
-            if (!confirm('Delete this submission?')) return;
-            await fetch(`${API}/submissions/${id}`, { method: 'DELETE' });
-            showToast('Submission deleted', 'success');
-            loadSubmissions('all', null);
-            loadOverview();
-        }
-
-        async function clearAllSubs() {
-            if (!confirm('Delete ALL submissions from the database? This cannot be undone.')) return;
-            await fetch(`${API}/submissions`, { method: 'DELETE' });
-            showToast('All submissions cleared', 'success');
-            loadSubmissions('all', null);
-            loadOverview();
-        }
-
-        async function exportSubs() {
-            window.open(`${API}/submissions/export`);
         }
 
         // ── SETTINGS ──
@@ -1430,16 +1266,32 @@
             if (!u || !p) { showToast('Please fill in all fields', 'error'); return; }
             if (p !== c) { showToast('Passwords do not match', 'error'); return; }
             try {
-                await fetch(`${API}/credentials`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                const res = await apiFetch('/credentials', {
+                    method: 'POST',
                     body: JSON.stringify({ username: u, password: p })
                 });
-                showToast('✅ Credentials saved to database!', 'success');
-                document.getElementById('topbar-user').innerHTML = `Signed in as <strong>${u}</strong>`;
-            } catch { showToast('❌ Save failed', 'error'); }
+                if (res.ok) {
+                    showToast('✅ Credentials saved! Please login again.');
+                    setTimeout(doLogout, 2000);
+                } else {
+                    showToast('❌ Save failed', 'error');
+                }
+            } catch { showToast('❌ Save failed — server offline', 'error'); }
         }
 
-        // ── HELPERS ──
+        // ── UI HELPERS ──
+        function showPage(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`page-${id}`).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            if (el) el.classList.add('active');
+        }
+
+        function toggleServerHelp() {
+            const p = document.getElementById('srv-popover');
+            p.style.display = p.style.display === 'none' ? 'block' : 'none';
+        }
+
         function formatDate(dt) {
             if (!dt) return '—';
             const d = new Date(dt);
