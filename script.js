@@ -148,9 +148,91 @@ function initIntro() {
     lens.position.set(0, 0, 0.9);
     cameraMesh.add(lens);
 
-    // Lens glass
-    const glassGeo = new THREE.CircleGeometry(0.38, 32);
-    const glassMat = new THREE.MeshStandardMaterial({ color: 0x0a1a3a, emissive: 0x0a1a4a, roughness: 0.0, metalness: 1.0, transparent: true, opacity: 0.9 });
+    // Lens glass — Logo Texture
+    const logoCanvas = document.createElement('canvas');
+    logoCanvas.width = 512;
+    logoCanvas.height = 512;
+    const ctx = logoCanvas.getContext('2d');
+
+    // Circular beige background
+    ctx.beginPath();
+    ctx.arc(256, 256, 250, 0, Math.PI * 2);
+    ctx.fillStyle = '#f5f0e8';
+    ctx.fill();
+
+    // Camera body (rounded rect)
+    ctx.fillStyle = '#111111';
+    const bx = 135, by = 155, bw = 160, bh = 115, br = 12;
+    ctx.beginPath();
+    ctx.moveTo(bx + br, by);
+    ctx.lineTo(bx + bw - br, by);
+    ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + br);
+    ctx.lineTo(bx + bw, by + bh - br);
+    ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - br, by + bh);
+    ctx.lineTo(bx + br, by + bh);
+    ctx.quadraticCurveTo(bx, by + bh, bx, by + bh - br);
+    ctx.lineTo(bx, by + br);
+    ctx.quadraticCurveTo(bx, by, bx + br, by);
+    ctx.closePath();
+    ctx.fill();
+
+    // Film reels (two circles on top)
+    ctx.beginPath();
+    ctx.arc(190, 140, 24, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(255, 140, 24, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Play button (red triangle)
+    ctx.fillStyle = '#e53935';
+    ctx.beginPath();
+    ctx.moveTo(195, 185);
+    ctx.lineTo(195, 240);
+    ctx.lineTo(250, 212);
+    ctx.closePath();
+    ctx.fill();
+
+    // Viewfinder / lens cone (right side triangle)
+    ctx.fillStyle = '#111111';
+    ctx.beginPath();
+    ctx.moveTo(295, 165);
+    ctx.lineTo(295, 260);
+    ctx.lineTo(360, 195);
+    ctx.lineTo(360, 230);
+    ctx.lineTo(295, 260);
+    // Re-draw as a proper trapezoid
+    ctx.closePath();
+    ctx.fill();
+    // Actually draw a cleaner viewfinder
+    ctx.beginPath();
+    ctx.moveTo(295, 170);
+    ctx.lineTo(350, 190);
+    ctx.lineTo(350, 240);
+    ctx.lineTo(295, 260);
+    ctx.closePath();
+    ctx.fill();
+
+    // Text: SHRADDHA
+    ctx.fillStyle = '#111111';
+    ctx.font = 'bold 52px "Arial Black", "Impact", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('SHRADDHA', 256, 320);
+
+    // Text: VIDEOLOGY
+    ctx.font = 'bold 42px "Arial Black", "Impact", sans-serif';
+    ctx.fillText('VIDEOLOGY', 256, 370);
+
+    const logoTexture = new THREE.CanvasTexture(logoCanvas);
+    logoTexture.needsUpdate = true;
+
+    const glassGeo = new THREE.CircleGeometry(0.38, 64);
+    const glassMat = new THREE.MeshBasicMaterial({
+        map: logoTexture,
+        transparent: false,
+        side: THREE.FrontSide
+    });
     const glass = new THREE.Mesh(glassGeo, glassMat);
     glass.position.set(0, 0, 1.42);
     cameraMesh.add(glass);
@@ -673,7 +755,10 @@ function playReel(thumb, driveId, label, num) {
     if (iframe) {
         iframe.src = `https://drive.google.com/file/d/${driveId}/preview`;
     }
-    if (mainTitle) mainTitle.textContent = label;
+    // Always read the latest label from the DOM (may have been updated by server config)
+    const thumbLabel = thumb.querySelector('.reel-thumb-label');
+    const currentLabel = thumbLabel ? thumbLabel.textContent : label;
+    if (mainTitle) mainTitle.textContent = `🎬 ${currentLabel} — Studio Showcase`;
     if (counter && num) counter.textContent = num + ' / 10';
 
     // Update active thumbnail highlight
